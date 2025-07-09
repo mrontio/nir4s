@@ -64,62 +64,47 @@ object NIRMapper {
 
 
     // 4) Dispatch based on the "nodeType" attribute
-    attrs("type").asInstanceOf[String] match {
+    val params = attrs("type").asInstanceOf[String] match {
       case "Input" =>
-        Input(
-          id          = grp.getName,
+        InputParams(
           shape = get1DLong("shape"),
-          previous = Set.empty[String]
-
         )
 
       case "Output" =>
-        Output(
-          id         = grp.getName,
+        OutputParams(
           shape      = get1DLong("shape"),
-          previous   = getIncomingEdges(grp.getName)
         )
       case "LIF" =>
-        LIF(
-          id          = grp.getName,
+        LIFParams(
           tau         = get1DFloat("tau"),
           r           = get1DFloat("r"),
           v_leak      = get1DFloat("v_leak"),
           v_threshold = get1DFloat("v_threshold"),
-          previous   = getIncomingEdges(grp.getName)
         )
 
       case "CubaLIF" =>
-        CubaLIF(
-          id         = grp.getName,
+        CubaLIFParams(
           tau        = get1DFloat("tau"),
           tauSynExc  = get1DFloat("tauSynExc"),
           tauSynInh  = get1DFloat("tauSynInh"),
-          previous   = getIncomingEdges(grp.getName)
         )
 
       case "Linear" =>
-        Linear(
-          id          = grp.getName,
+        LinearParams(
           weight      = get1DFloat("weight"),
-          previous   = getIncomingEdges(grp.getName)
         )
 
       case "LI" =>
-        LI(
-          id = grp.getName,
+        LIParams(
           tau = get1DFloat("tau"),
           r = get1DFloat("r"),
           v_leak = get1DFloat("v_leak"),
-          previous = getIncomingEdges(grp.getName)
         )
 
       case "Affine" =>
-        Affine(
-          id          = grp.getName,
+        AffineParams(
           bias        = get1DFloat("bias"),
           weight      = get2DFloat("weight"),
-          previous   = getIncomingEdges(grp.getName)
         )
 
       case other =>
@@ -127,5 +112,12 @@ object NIRMapper {
           s"NIRMapper: Unknown nodeType '$other' in group '${grp.getName}'"
         )
     }
+
+    NIRNode(
+      id       = grp.getName,
+      previous = getIncomingEdges(grp.getName),
+      params   = params
+    )
+
   }
 }

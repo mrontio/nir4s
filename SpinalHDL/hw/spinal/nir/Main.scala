@@ -11,4 +11,5 @@ object Main extends App {
 
   val g = NIRGraph(NIRMapper.loadNodes(file))
   print(g.bot.previous.mkString(", "))
+  print(g.bot)
 }

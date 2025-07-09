@@ -1,73 +1,56 @@
 // src/main/scala/nir/NIRNode.scala
 package nir
 
-sealed trait NIRNode {
-  def id: String
-  def previous: Set[String]
-}
+case class NIRNode(
+  id:       String,
+  previous: Set[String],
+  params:   NIRParams
+)
 
-case class LIF(
-  id: String,
+sealed trait NIRParams
+
+final case class LIFParams(
   tau: Array[Float],
   r: Array[Float],
   v_leak: Array[Float],
   v_threshold: Array[Float],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
-case class LI(
-  id: String,
+final case class LIParams(
   tau: Array[Float],
   r: Array[Float],
   v_leak: Array[Float],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
-case class CubaLIF(
-  id: String,
+final case class CubaLIFParams(
   tau: Array[Float],
   tauSynExc: Array[Float],
   tauSynInh: Array[Float],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
-case class Conv2d(
-  id: String,
+final case class Conv2dParams(
   kernelSize: (Int,Int),
   numFilters: Int,
   stride: (Int,Int),
   padding: (Int,Int),
   bias: Array[Array[Float]],
   weight: Array[Array[Float]],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
-case class Linear(
-  id: String,
+final case class LinearParams(
   weight: Array[Float],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
-
-case class Affine(
-  id: String,
+final case class AffineParams(
   bias: Array[Float],
   weight: Array[Array[Float]],
-  previous: Set[String]
-) extends NIRNode
+) extends NIRParams
 
 
-case class Input(
-  id: String,
+final case class InputParams(
   shape: Array[Long],
-  previous: Set[String]
+) extends NIRParams
 
-
-) extends NIRNode
-
-case class Output(
-  id: String,
+final case class OutputParams(
   shape: Array[Long],
-  previous: Set[String]
-
-) extends NIRNode
+) extends NIRParams
