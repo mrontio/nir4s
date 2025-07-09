@@ -6,27 +6,31 @@ import io.jhdf.api.{Attribute, Dataset, Group, Node}
 import scala.jdk.CollectionConverters._
 
 object NIRMapper {
-  def loadNodes(f: File, nodePath: String = "/node/nodes", edgePath: String = "/node/edges"): Set[NIRNode] = {
-    def loadEdges(edgeHDF: Node): Set[(String, String)] = edgeHDF match {
-      case dst: Dataset =>
-        dst.getData().asInstanceOf[Array[Array[String]]].map { case Array(a, b) => (a, b) }.toSet
-    }
-
-    if (!f.exists()) {
+  def loadGraph(f: File, nodePath: String = "/node/nodes", edgePath: String = "/node/edges") {
+        if (!f.exists()) {
       Console.err.println(s"ERROR: file not found: ${f.getAbsolutePath}")
       sys.exit(2)
     }
 
     val hdf = new HdfFile(f)
+    val rawNodes = loadNodes(hdf)
+
+
+  private def loadRawNodes(hdf: HdfFile): Set[RawNode] = {
+    def loadEdges(edgeHDF: Node): Set[(String, String)] = edgeHDF match {
+      case dst: Dataset =>
+        dst.getData().asInstanceOf[Array[Array[String]]].map { case Array(a, b) => (a, b) }.toSet
+    }
+
     val edges = loadEdges(hdf.getByPath(edgePath))
     val nodeHDF = hdf.getByPath(nodePath)
 
-    nodeHDF match {
+    val rawNode = nodeHDF match {
       case grp: Group =>
         // grp.getChildren: java.util.Map[String, Node]
         grp.getChildren.asScala.collect {
           case (name, childGrp: Group) => {
-            parseNodeGroup(childGrp, edges)
+            parseNode(childGrp, edges)
           }
         }.toSet
       case other =>
@@ -38,10 +42,10 @@ object NIRMapper {
 
 
 
-  private def parseNodeGroup(grp: Group, edges: Set[(String, String)]): NIRNode = {
+  private def parseNode(node: Group, edges: Set[(String, String)]): NIRNode = {
     // 1) Collect all attributes into a Map[name -> rawData]
     val attrs: Map[String, Any] =
-      grp.getChildren.asScala
+      node.getChildren.asScala
         .map { case (attrName, attr: Dataset) => attrName -> attr.getData }
         .toMap
 
@@ -109,15 +113,14 @@ object NIRMapper {
 
       case other =>
         throw new UnsupportedOperationException(
-          s"NIRMapper: Unknown nodeType '$other' in group '${grp.getName}'"
+          s"NIRMapper: Unknown nodeType '$other' in group '${node.getName}'"
         )
     }
 
-    NIRNode(
-      id       = grp.getName,
-      previous = getIncomingEdges(grp.getName),
+    RawNode(
+      id       = node.getName,
+      previous = getIncomingEdges(node.getName),
       params   = params
     )
-
   }
 }

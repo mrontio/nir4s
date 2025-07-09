@@ -1,9 +1,15 @@
 // src/main/scala/nir/NIRNode.scala
 package nir
 
+case class RawNode(
+  id:      String,
+  prevIds: Set[String],
+  params:  NIRParams
+)
+
 case class NIRNode(
   id:       String,
-  previous: Set[String],
+  previous: Set[NIRNode],
   params:   NIRParams
 )
 
