@@ -42,11 +42,7 @@ object NIRGraph {
         convertRawNodes(nodes, newNode) ++ Set(newNode)
       }
       case _ => {
-        // TODO: Recursive case: Multiple next
-        println("Oh shoot!")
-        println(next)
-        println(next.size)
-        Set.empty[NIRNode]
+        throw new RuntimeException("error: multiple connections not yet supported.")
       }
     }
   }
