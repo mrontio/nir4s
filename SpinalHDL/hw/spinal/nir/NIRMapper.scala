@@ -6,43 +6,41 @@ import io.jhdf.api.{Attribute, Dataset, Group, Node}
 import scala.jdk.CollectionConverters._
 
 object NIRMapper {
-  def loadGraph(f: File, nodePath: String = "/node/nodes", edgePath: String = "/node/edges") {
-        if (!f.exists()) {
+  def loadGraph(f: File, nodePath: String = "/node/nodes", edgePath: String = "/node/edges"): NIRGraph = {
+    if (!f.exists()) {
       Console.err.println(s"ERROR: file not found: ${f.getAbsolutePath}")
       sys.exit(2)
     }
 
     val hdf = new HdfFile(f)
-    val rawNodes = loadNodes(hdf)
-
-
-  private def loadRawNodes(hdf: HdfFile): Set[RawNode] = {
-    def loadEdges(edgeHDF: Node): Set[(String, String)] = edgeHDF match {
-      case dst: Dataset =>
-        dst.getData().asInstanceOf[Array[Array[String]]].map { case Array(a, b) => (a, b) }.toSet
-    }
-
-    val edges = loadEdges(hdf.getByPath(edgePath))
     val nodeHDF = hdf.getByPath(nodePath)
+    val edges = loadEdges(hdf.getByPath(edgePath))
+    NIRGraph.fromRaw(loadRawNodes(nodeHDF, edges))
 
-    val rawNode = nodeHDF match {
+  }
+
+  private def loadEdges(edgeHDF: Node): Set[(String, String)] = edgeHDF match {
+    case dst: Dataset =>
+      dst.getData().asInstanceOf[Array[Array[String]]].map { case Array(a, b) => (a, b) }.toSet
+  }
+
+  private def loadRawNodes(nodeHDF: Node, edges: Set[(String, String)]): Set[RawNode] = {
+    nodeHDF match {
       case grp: Group =>
-        // grp.getChildren: java.util.Map[String, Node]
         grp.getChildren.asScala.collect {
-          case (name, childGrp: Group) => {
+          case (_, childGrp: Group) =>
             parseNode(childGrp, edges)
-          }
-        }.toSet
+        }.toSet.asInstanceOf[Set[RawNode]]
       case other =>
         throw new IllegalArgumentException(
-          s"Expected a Group at '$nodePath', but found ${other.getClass.getName}"
+          s"Expected a Group, but found ${other.getClass.getName}"
         )
     }
   }
 
 
 
-  private def parseNode(node: Group, edges: Set[(String, String)]): NIRNode = {
+  private def parseNode(node: Group, edges: Set[(String, String)]): RawNode = {
     // 1) Collect all attributes into a Map[name -> rawData]
     val attrs: Map[String, Any] =
       node.getChildren.asScala
@@ -119,7 +117,7 @@ object NIRMapper {
 
     RawNode(
       id       = node.getName,
-      previous = getIncomingEdges(node.getName),
+      prevIds = getIncomingEdges(node.getName),
       params   = params
     )
   }

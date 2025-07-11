@@ -9,7 +9,7 @@ object Main extends App {
   }
   val file = new File(args(0))
 
-  val g = NIRGraph(NIRMapper.loadNodes(file))
-  print(g.bot.previous.mkString(", "))
-  print(g.bot)
+  val g: NIRGraph = NIRMapper.loadGraph(file)
+  print(g.top.previous.mkString(", "))
+  print(g.top)
 }
