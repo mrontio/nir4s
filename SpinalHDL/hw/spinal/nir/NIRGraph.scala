@@ -2,32 +2,52 @@ package nir
 import nir.NIRNode
 
 case class NIRGraph(nodes: Set[NIRNode]) {
-  val top: NIRNode = nodes.find(_.id == "input").get
-  // lazy val bot: NIRNode = nodes.find(_.id == "output").get
+  val top: NIRNode = nodes.find(_.previous.size == 0).get
+  val bot: NIRNode = nodes.find(_.id == "output").get
   val nodeMap: Map[String, NIRNode] = nodes.map(node => node.id -> node).toMap
+
 
   def getNode(id: String): NIRNode = nodeMap(id)
 }
 
 object NIRGraph {
   def fromRaw(rawNodes: Set[RawNode]): NIRGraph = {
-    val rawNodeMap: Map[String, RawNode] = rawNodes.map(node => node.id -> node).toMap
     val topRaw: RawNode = rawNodes.find(_.id == "input").get
     val top: NIRNode = NIRNode(topRaw.id, Set.empty[NIRNode], topRaw.params)
-    graphFromRaw(rawNodeMap, top)
+    // TODO: put initial case into recursive function
+    val nodes = Set(top) ++ convertRawNodes(rawNodes, top)
+    NIRGraph(nodes)
   }
 
-  private def graphFromRaw(map: Map[String, RawNode], top: NIRNode): NIRGraph = {
+  private def convertRawNodes(nodes: Set[RawNode], top: NIRNode): Set[NIRNode] = {
     // find previous link that goes to top
-    val previous: Iterable[RawNode] = map.values.collect {
+    val next: Set[RawNode] = nodes.collect {
       case n if n.prevIds.contains(top.id) => n
     }
-    NIRGraph(Set[NIRNode](top))
 
-    // construct them one by one
-    // set both of them to top
-    // base case: nothing links to top
-    // base case: the node we link to links to use (recurrence)
-    // recursion case: graphFromRaw(map, linked_to_top)
+    next match {
+      case s if s.size == 1 && s.head.id == "output" => {
+        // Base case: output
+        val newNode = NIRNode(s.head.id, Set(top), s.head.params)
+        Set(newNode)
+      }
+      case s if s.size == 1 && s.head.id == top.id => {
+        // Base case: recurrence
+        Set(top)
+      }
+      case s if s.size == 1 => {
+        // Recursive case: Single next
+        val head = s.head
+        val newNode = NIRNode(head.id, Set(top), head.params)
+        convertRawNodes(nodes, newNode) ++ Set(newNode)
+      }
+      case _ => {
+        // TODO: Recursive case: Multiple next
+        println("Oh shoot!")
+        println(next)
+        println(next.size)
+        Set.empty[NIRNode]
+      }
+    }
   }
 }

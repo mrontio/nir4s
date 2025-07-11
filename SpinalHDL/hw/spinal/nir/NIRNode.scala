@@ -11,7 +11,12 @@ case class NIRNode(
   id:       String,
   previous: Set[NIRNode],
   params:   NIRParams
-)
+) {
+  override def toString: String = {
+    val prevIds = previous.map(_.id).mkString("{", ", ", "}")
+    s"NIRNode(id=$id, previous=$prevIds, params=$params)"
+  }
+}
 
 sealed trait NIRParams
 
