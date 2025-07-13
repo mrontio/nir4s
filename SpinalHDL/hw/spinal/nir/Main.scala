@@ -10,9 +10,9 @@ object Main extends App {
   val file = new File(args(0))
 
   val g: NIRGraph = NIRMapper.loadGraph(file)
-  println(s"top: ${g.top}")
-  println(s"top previous: " + g.top.previous.mkString(", "))
-  println(s"top: ${g.bot}")
-  println(s"bot previous: " + g.bot.previous.mkString(", "))
+  println(s"top: ${g.input}")
+  println(s"top previous: " + g.input.previous.mkString(", "))
+  println(s"top: ${g.output}")
+  println(s"bot previous: " + g.output.previous.mkString(", "))
 
 }

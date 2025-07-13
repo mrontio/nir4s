@@ -2,8 +2,8 @@ package nir
 import nir.NIRNode
 
 case class NIRGraph(nodes: Set[NIRNode]) {
-  val top: NIRNode = nodes.find(_.previous.size == 0).get
-  val bot: NIRNode = nodes.find(_.id == "output").get
+  val input: NIRNode = nodes.find(_.previous.size == 0).get
+  val output: NIRNode = nodes.find(_.id == "output").get
   val nodeMap: Map[String, NIRNode] = nodes.map(node => node.id -> node).toMap
 
 
