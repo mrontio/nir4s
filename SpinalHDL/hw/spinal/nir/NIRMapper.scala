@@ -69,12 +69,12 @@ object NIRMapper {
     val params = attrs("type").asInstanceOf[String] match {
       case "Input" =>
         InputParams(
-          shape = get1DLong("shape"),
+          shape = get1DLong("shape").map(_.toInt).toArray,
         )
 
       case "Output" =>
         OutputParams(
-          shape      = get1DLong("shape"),
+          shape      = get1DLong("shape").map(_.toInt).toArray,
         )
       case "LIF" =>
         LIFParams(

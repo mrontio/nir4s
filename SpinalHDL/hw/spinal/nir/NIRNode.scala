@@ -59,9 +59,9 @@ final case class AffineParams(
 
 
 final case class InputParams(
-  shape: Array[Long],
+  shape: Array[Int],
 ) extends NIRParams
 
 final case class OutputParams(
-  shape: Array[Long],
+  shape: Array[Int],
 ) extends NIRParams
