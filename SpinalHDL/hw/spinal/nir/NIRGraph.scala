@@ -11,6 +11,18 @@ case class NIRGraph(nodes: Set[NIRNode]) {
 }
 
 object NIRGraph {
+  def fromSimpleChain(input: InputParams, chain: List[NIRParams], output: OutputParams): NIRGraph = {
+    val inputNode = RawNode("input", Set(), input)
+
+    val withId = chain.zipWithIndex.map{ case (n, idx) => (n, idx.toString)} :+ (output, "output")
+
+    val prevId = "input" :: withId.map(_._2)
+
+    val rawNodes = inputNode :: withId.zip(prevId).map{ case ((params, id), prevId) => RawNode(id, Set(prevId), params)}
+
+    fromRaw(rawNodes.toSet)
+  }
+
   def fromRaw(rawNodes: Set[RawNode]): NIRGraph = {
     val topRaw: RawNode = rawNodes.find(_.id == "input").get
     val top: NIRNode = NIRNode(topRaw.id, Set.empty[NIRNode], topRaw.params)
