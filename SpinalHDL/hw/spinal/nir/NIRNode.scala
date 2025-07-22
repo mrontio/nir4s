@@ -40,12 +40,14 @@ final case class CubaLIFParams(
 ) extends NIRParams
 
 final case class Conv2dParams(
-  kernelSize: (Int,Int),
-  numFilters: Int,
-  stride: (Int,Int),
+  dilation: (Float, Float),
+  groups: Int,
+  input_shape: (Int, Int),
   padding: (Int,Int),
-  bias: Array[Array[Float]],
-  weight: Array[Array[Float]],
+  stride: (Int,Int),
+  bias: nir.Matrix1D[Float],
+  weight: nir.Matrix4D[Float],
+  kernelSize: (Int,Int), // Computed from weight
 ) extends NIRParams
 
 final case class LinearParams(

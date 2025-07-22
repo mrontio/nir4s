@@ -49,17 +49,19 @@ object NIRMapper {
 
 
     // 2) Helpers to extract typed values
+    // Scalars
     def getStr(key: String): String    = attrs(key).asInstanceOf[String]
     def getInt(key: String): Int       = attrs(key).asInstanceOf[Int]
-    def getFloat(key: String): Float = attrs(key).asInstanceOf[Float]
+    def getFloat(key: String): Float   = attrs(key).asInstanceOf[Float]
 
-
-    def get1DLong(key: String): Array[Long] = attrs(key).asInstanceOf[Array[Long]]
+    // Vectors
+    def get1DLong(key: String): Array[Long]   = attrs(key).asInstanceOf[Array[Long]]
     def get1DFloat(key: String): Array[Float] = attrs(key) match {
       case f: Float => Array(f)
       case arr: Array[Float] => arr
     }
-    def get2DFloat(key: String): Array[Array[Float]] = attrs(key).asInstanceOf[Array[Array[Float]]]
+
+    def getAttr[T](key: String): T = attrs(key).asInstanceOf[T]
 
     def getIncomingEdges(node: String): Set[String] =
       edges.collect { case (p, n) if n == node => p }
@@ -78,35 +80,36 @@ object NIRMapper {
         )
       case "LIF" =>
         LIFParams(
-          tau         = get1DFloat("tau"),
-          r           = get1DFloat("r"),
-          v_leak      = get1DFloat("v_leak"),
-          v_threshold = get1DFloat("v_threshold"),
+          tau         = getAttr[nir.Matrix1D[Float]]("tau"),
+          r           = getAttr[nir.Matrix1D[Float]]("r"),
+          v_leak      = getAttr[nir.Matrix1D[Float]]("v_leak"),
+          v_threshold = getAttr[nir.Matrix1D[Float]]("v_threshold"),
         )
+
 
       case "CubaLIF" =>
         CubaLIFParams(
-          tau        = get1DFloat("tau"),
-          tauSynExc  = get1DFloat("tauSynExc"),
-          tauSynInh  = get1DFloat("tauSynInh"),
+          tau        = getAttr[nir.Matrix1D[Float]]("tau"),
+          tauSynExc  = getAttr[nir.Matrix1D[Float]]("tauSynExc"),
+          tauSynInh  = getAttr[nir.Matrix1D[Float]]("tauSynInh"),
         )
 
       case "Linear" =>
         LinearParams(
-          weight      = get1DFloat("weight"),
+          weight      = getAttr[nir.Matrix1D[Float]]("weight"),
         )
 
       case "LI" =>
         LIParams(
-          tau = get1DFloat("tau"),
-          r = get1DFloat("r"),
-          v_leak = get1DFloat("v_leak"),
+          tau = getAttr[nir.Matrix1D[Float]]("tau"),
+          r = getAttr[nir.Matrix1D[Float]]("r"),
+          v_leak = getAttr[nir.Matrix1D[Float]]("v_leak"),
         )
 
       case "Affine" =>
         AffineParams(
-          bias        = get1DFloat("bias"),
-          weight      = get2DFloat("weight"),
+          bias        = getAttr[nir.Matrix1D[Float]]("bias"),
+          weight      = getAttr[nir.Matrix2D[Float]]("weight"),
         )
 
       case other =>
