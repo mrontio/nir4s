@@ -112,9 +112,22 @@ object NIRMapper {
           weight      = getAttr[nir.Matrix2D[Float]]("weight"),
         )
 
+      case "Conv1d" =>
+        Conv1DParams(
+          weights = Conv1DWeights(
+            get = getAttr[nir.Matrix3D[Float]]("weight")
+          ),
+          bias = getAttr[nir.Matrix1D[Float]]("bias"),
+          stride = getAttr[Array[Long]]("stride"),
+          padding = getAttr[Array[Long]]("padding"),
+          dilation = getAttr[Array[Long]]("dilation"),
+          groups = getAttr[Long]("groups"),
+          input_shape = getAttr[Long]("input_shape")
+        )
+
       case other =>
         throw new UnsupportedOperationException(
-          s"NIRMapper: Unknown nodeType '$other' in group '${node.getName}'"
+          s"NIRMapper: nodeType '$other' in group '${node.getName} not yet supported.'"
         )
     }
 
