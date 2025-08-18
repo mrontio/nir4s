@@ -39,6 +39,16 @@ object NIRMapper {
   }
 
 
+  private def getTensor(key: String, attrs: Map[String, Any]): Tensor = {
+    val attr = attrs(key)
+    attr.getClass.getName match {
+      case "[F" => Tensor1D(attr.asInstanceOf[Array[Float]])
+      case "[[F" => Tensor2D(attr.asInstanceOf[Array[Array[Float]]])
+      case "[[[F" => Tensor3D(attr.asInstanceOf[Array[Array[Array[Float]]]])
+      case "[[[[F" => Tensor4D(attr.asInstanceOf[Array[Array[Array[Array[Float]]]]])
+      case a => throw new java.text.ParseException(s"Expected to read float tensor but read \"${a}\"", 0)
+    }
+  }
 
   private def parseNode(node: Group, edges: Set[(String, String)]): RawNode = {
     // 1) Collect all attributes into a Map[name -> rawData]
@@ -80,50 +90,50 @@ object NIRMapper {
         )
       case "LIF" =>
         LIFParams(
-          tau         = getAttr[nir.Matrix1D[Float]]("tau"),
-          r           = getAttr[nir.Matrix1D[Float]]("r"),
-          v_leak      = getAttr[nir.Matrix1D[Float]]("v_leak"),
-          v_threshold = getAttr[nir.Matrix1D[Float]]("v_threshold"),
+          tau         = getTensor("tau", attrs),
+          r           = getTensor("r", attrs),
+          v_leak      = getTensor("v_leak", attrs),
+          v_threshold = getTensor("v_threshold", attrs),
         )
 
 
       case "CubaLIF" =>
         CubaLIFParams(
-          tau        = getAttr[nir.Matrix1D[Float]]("tau"),
-          tauSynExc  = getAttr[nir.Matrix1D[Float]]("tauSynExc"),
-          tauSynInh  = getAttr[nir.Matrix1D[Float]]("tauSynInh"),
+          tau        = getTensor("tau", attrs),
+          tauSynExc  = getTensor("tauSynExc", attrs),
+          tauSynInh  = getTensor("tauSynInh", attrs),
         )
 
       case "Linear" =>
         LinearParams(
-          weight      = getAttr[nir.Matrix1D[Float]]("weight"),
+          weight      = getTensor("weight", attrs),
         )
 
       case "LI" =>
         LIParams(
-          tau = getAttr[nir.Matrix1D[Float]]("tau"),
-          r = getAttr[nir.Matrix1D[Float]]("r"),
-          v_leak = getAttr[nir.Matrix1D[Float]]("v_leak"),
+          tau = getTensor("tau", attrs),
+          r = getTensor("r", attrs),
+          v_leak = getTensor("v_leak", attrs),
         )
 
       case "Affine" =>
         AffineParams(
-          bias        = getAttr[nir.Matrix1D[Float]]("bias"),
-          weight      = getAttr[nir.Matrix2D[Float]]("weight"),
+          bias        = getTensor("bias", attrs),
+          weight      = getTensor("weight", attrs),
         )
 
-      case "Conv1d" =>
-        Conv1DParams(
-          weights = Conv1DWeights(
-            get = getAttr[nir.Matrix3D[Float]]("weight")
-          ),
-          bias = getAttr[nir.Matrix1D[Float]]("bias"),
-          stride = getAttr[Array[Long]]("stride"),
-          padding = getAttr[Array[Long]]("padding"),
-          dilation = getAttr[Array[Long]]("dilation"),
-          groups = getAttr[Long]("groups"),
-          input_shape = getAttr[Long]("input_shape")
-        )
+      // case "Conv1d" =>
+      //   Conv1DParams(
+      //     weights = Conv1DWeights(
+      //       get = getTensor("weight", attrs)
+      //     ),
+      //     bias = getTensor("bias", attrs),
+      //     stride = getAttr[Array[Long]]("stride"),
+      //     padding = getAttr[Array[Long]]("padding"),
+      //     dilation = getAttr[Array[Long]]("dilation"),
+      //     groups = getAttr[Long]("groups"),
+      //     input_shape = getAttr[Long]("input_shape")
+      //   )
 
       case other =>
         throw new UnsupportedOperationException(

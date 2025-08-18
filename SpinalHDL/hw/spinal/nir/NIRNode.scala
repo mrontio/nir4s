@@ -50,22 +50,22 @@ final case class Conv1DParams(
 ) extends NIRParams
 
 final case class LIFParams(
-  tau: Array[Float],
-  r: Array[Float],
-  v_leak: Array[Float],
-  v_threshold: Array[Float],
+  tau: Tensor,
+  r: Tensor,
+  v_leak: Tensor,
+  v_threshold: Tensor,
 ) extends NIRParams
 
 final case class LIParams(
-  tau: Array[Float],
-  r: Array[Float],
-  v_leak: Array[Float],
+  tau: Tensor,
+  r: Tensor,
+  v_leak: Tensor,
 ) extends NIRParams
 
 final case class CubaLIFParams(
-  tau: Array[Float],
-  tauSynExc: Array[Float],
-  tauSynInh: Array[Float],
+  tau: Tensor,
+  tauSynExc: Tensor,
+  tauSynInh: Tensor,
 ) extends NIRParams
 
 final case class Conv2dParams(
@@ -80,12 +80,12 @@ final case class Conv2dParams(
 ) extends NIRParams
 
 final case class LinearParams(
-  weight: Array[Float],
+  weight: Tensor,
 ) extends NIRParams
 
 final case class AffineParams(
-  bias: Array[Float],
-  weight: Array[Array[Float]],
+  bias: Tensor,
+  weight: Tensor,
 ) extends NIRParams
 
 
