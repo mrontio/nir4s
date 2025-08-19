@@ -13,11 +13,11 @@ sealed trait Tensor {
   def squeezeable: Boolean = squeezableIndices.size > 0
 }
 
-case class Tensor1D(data: ArraySeq[Float]) extends Tensor {
+case class Tensor1D(data: Array[Float]) extends Tensor {
     override def shape: Seq[Int] = Seq(data.length)
 }
 
-case class Tensor2D(data: ArraySeq[Tensor1D]) extends Tensor {
+case class Tensor2D(data: Array[Tensor1D]) extends Tensor {
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor1D) => t.shape
@@ -25,7 +25,7 @@ case class Tensor2D(data: ArraySeq[Tensor1D]) extends Tensor {
     })
 }
 
-case class Tensor3D(data: ArraySeq[Tensor2D]) extends Tensor {
+case class Tensor3D(data: Array[Tensor2D]) extends Tensor {
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor2D) => t.shape
@@ -33,7 +33,7 @@ case class Tensor3D(data: ArraySeq[Tensor2D]) extends Tensor {
     })
 }
 
-case class Tensor4D(data: ArraySeq[Tensor3D]) extends Tensor {
+case class Tensor4D(data: Array[Tensor3D]) extends Tensor {
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor3D) => t.shape
@@ -59,10 +59,10 @@ object Tensor {
     //t
   }
 
-  private def fromArray1D(a: Array[Float]): Tensor1D = Tensor1D(ArraySeq.unsafeWrapArray(a))
-  private def fromArray2D(a: Array[Array[Float]]): Tensor2D =  Tensor2D(ArraySeq.unsafeWrapArray(a.map(fromArray1D(_))))
-  private def fromArray3D(a: Array[Array[Array[Float]]]): Tensor3D =  Tensor3D(ArraySeq.unsafeWrapArray(a.map(fromArray2D(_))))
-  private def fromArray4D(a: Array[Array[Array[Array[Float]]]]): Tensor4D =  Tensor4D(ArraySeq.unsafeWrapArray(a.map(fromArray3D(_))))
+  private def fromArray1D(a: Array[Float]): Tensor1D = Tensor1D(a)
+  private def fromArray2D(a: Array[Array[Float]]): Tensor2D =  Tensor2D(a.map(fromArray1D(_)))
+  private def fromArray3D(a: Array[Array[Array[Float]]]): Tensor3D =  Tensor3D(a.map(fromArray2D(_)))
+  private def fromArray4D(a: Array[Array[Array[Array[Float]]]]): Tensor4D =  Tensor4D(a.map(fromArray3D(_)))
 
   // This is a bad function with known issues:
   // - Not generalized, as you can see I am hand-crafting each index here
@@ -74,12 +74,10 @@ object Tensor {
     t match {
       case t1: Tensor1D => t1
       case t2: Tensor2D => {
-        // Squeeze from the left to index zero
+        // Squeeze from the left towards index zero
         val ss = t2.squeezableIndices - 0
-        print(s"helllooooo??? $ss")
-        var result: ArraySeq[Float] = ArraySeq.empty[Float]
+        var result: Array[Float] = Array.empty[Float]
         for (s <- ss) {
-          print("helllooooo???")
           s match {
             case 1 => result = t2.data.collect {
               case t1: Tensor1D => t1.data
