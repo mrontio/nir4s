@@ -17,12 +17,25 @@ case class Tensor1D(data: Array[Float]) extends Tensor {
     override def shape: Seq[Int] = Seq(data.length)
 }
 
+
+object Tensor1D {
+  def apply(values: Float*): Tensor1D = {
+    new Tensor1D(values.toArray)
+  }
+}
+
 case class Tensor2D(data: Array[Tensor1D]) extends Tensor {
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor1D) => t.shape
       case None => Seq(0)
     })
+}
+
+object Tensor2D {
+  def apply(values: Tensor1D*): Tensor2D = {
+    new Tensor2D(values.toArray)
+  }
 }
 
 case class Tensor3D(data: Array[Tensor2D]) extends Tensor {
@@ -33,12 +46,24 @@ case class Tensor3D(data: Array[Tensor2D]) extends Tensor {
     })
 }
 
+object Tensor3D {
+  def apply(values: Tensor2D*): Tensor3D = {
+    new Tensor3D(values.toArray)
+  }
+}
+
 case class Tensor4D(data: Array[Tensor3D]) extends Tensor {
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor3D) => t.shape
       case None => Seq(0, 0, 0)
     })
+}
+
+object Tensor4D {
+  def apply(values: Tensor3D*): Tensor4D = {
+    new Tensor4D(values.toArray)
+  }
 }
 
 
