@@ -12,14 +12,15 @@ sealed trait Tensor[T] {
     shape.zipWithIndex.collect { case (s, i) if s <= 1 => i }.toSet
   }
   def squeezeable: Boolean = squeezableIndices.size > 0
+  def map[B: ClassTag](f: T => B): Tensor[B]
 }
 
 case class Tensor1D[T](data: Array[T]) extends Tensor[T] {
-    override def shape: Seq[Int] = Seq(data.length)
+  override def shape: Seq[Int] = Seq(data.length)
+  override def map[B: ClassTag](f: T => B): Tensor[B] = {
+     Tensor1D[B](data.map(f))
+  }
 }
-
-//
-
 
 object Tensor1D {
   def apply[T: ClassTag](values: T*): Tensor1D[T] = {
@@ -33,12 +34,18 @@ case class Tensor2D[T](data: Array[Tensor1D[T]]) extends Tensor[T] {
       case Some(t: Tensor1D[T]) => t.shape
       case None => Seq(0)
     })
+
+    override def map[B: ClassTag](f: T => B): Tensor2D[B] = {
+      Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]))
+    }
 }
 
 object Tensor2D {
   def apply[T](values: Tensor1D[T]*): Tensor2D[T] = {
     new Tensor2D(values.toArray)
   }
+
+  def apply[T](array: Array[Tensor1D[T]]) = new Tensor2D[T](array)
 }
 
 case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
@@ -47,12 +54,18 @@ case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
       case Some(t: Tensor2D[T]) => t.shape
       case None => Seq(0, 0)
     })
+
+    override def map[B: ClassTag](f: T => B): Tensor3D[B] = {
+      Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]))
+    }
 }
 
 object Tensor3D {
   def apply[T](values: Tensor2D[T]*): Tensor3D[T] = {
     new Tensor3D(values.toArray)
   }
+
+  def apply[T](array: Array[Tensor2D[T]]) = new Tensor3D[T](array)
 }
 
 case class Tensor4D[T](data: Array[Tensor3D[T]]) extends Tensor[T] {
@@ -61,12 +74,13 @@ case class Tensor4D[T](data: Array[Tensor3D[T]]) extends Tensor[T] {
       case Some(t: Tensor3D[T]) => t.shape
       case None => Seq(0, 0, 0)
     })
+
+    def apply[T](array: Array[Tensor3D[T]]) = new Tensor4D[T](array)
 }
 
 object Tensor4D {
-  def apply[T](values: Tensor3D[T]*): Tensor4D[T] = {
-    new Tensor4D(values.toArray)
-  }
+  def apply[T](values: Tensor3D[T]*): Tensor4D[T] =  new Tensor4D(values.toArray)
+  def apply[T](array: Array[Tensor3D[T]]) = new Tensor4D[T](array)
 }
 
 object Tensor {
