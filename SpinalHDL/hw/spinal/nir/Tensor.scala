@@ -1,31 +1,94 @@
 package nir
 
+import scala.collection.immutable.ArraySeq
+
 // Base trait / abstract class
 sealed trait Tensor {
   def shape: Seq[Int]
   def rank: Int = shape.length
+
+  protected def squeezableIndices: Set[Int] = {
+    shape.zipWithIndex.collect { case (s, i) if s <= 1 => i }.toSet
+  }
+  def squeezeable: Boolean = squeezableIndices.size > 0
 }
 
-// Specializations
-final case class Tensor1D(values: Array[Float]) extends Tensor {
-  override def shape: Seq[Int] = Seq(values.length)
+case class Tensor1D(data: ArraySeq[Float]) extends Tensor {
+    override def shape: Seq[Int] = Seq(data.length)
 }
 
-final case class Tensor2D(values: Array[Array[Float]]) extends Tensor {
-  override def shape: Seq[Int] = Seq(values.length, values.headOption.map(_.length).getOrElse(0))
-}
-
-final case class Tensor3D(values: Array[Array[Array[Float]]]) extends Tensor {
+case class Tensor2D(data: ArraySeq[Tensor1D]) extends Tensor {
   override def shape: Seq[Int] =
-    Seq(values.length,
-        values.headOption.map(_.length).getOrElse(0),
-        values.headOption.flatMap(_.headOption).map(_.length).getOrElse(0))
+    Seq(data.length) ++ (data.headOption match {
+      case Some(t: Tensor1D) => t.shape
+      case None => Seq(0)
+    })
 }
 
-final case class Tensor4D(values: Array[Array[Array[Array[Float]]]]) extends Tensor {
+case class Tensor3D(data: ArraySeq[Tensor2D]) extends Tensor {
   override def shape: Seq[Int] =
-    Seq(values.length,
-        values.headOption.map(_.length).getOrElse(0),
-        values.headOption.flatMap(_.headOption).map(_.length).getOrElse(0),
-        values.headOption.flatMap(_.headOption).flatMap(_.headOption).map(_.length).getOrElse(0))
+    Seq(data.length) ++ (data.headOption match {
+      case Some(t: Tensor2D) => t.shape
+      case None => Seq(0, 0)
+    })
+}
+
+case class Tensor4D(data: ArraySeq[Tensor3D]) extends Tensor {
+  override def shape: Seq[Int] =
+    Seq(data.length) ++ (data.headOption match {
+      case Some(t: Tensor3D) => t.shape
+      case None => Seq(0, 0, 0)
+    })
+}
+
+
+object Tensor {
+  // We want to give the map because we don't want to lose type info
+  def fromHDFMap(key: String, hdfMap: Map[String, Any]): Tensor = {
+    val attr = hdfMap(key)
+    val t: Tensor = attr.getClass.getName match {
+      case "[F" => fromArray1D(attr.asInstanceOf[Array[Float]])
+      case "[[F" => fromArray2D(attr.asInstanceOf[Array[Array[Float]]])
+      case "[[[F" => fromArray3D(attr.asInstanceOf[Array[Array[Array[Float]]]])
+      case "[[[[F" => fromArray4D(attr.asInstanceOf[Array[Array[Array[Array[Float]]]]])
+      case a => throw new java.text.ParseException(s"Expected to read float tensor but read \"${a}\"", 0)
+    }
+
+    // Get rid of singleton dimensions
+    squeeze(t)
+    //t
+  }
+
+  private def fromArray1D(a: Array[Float]): Tensor1D = Tensor1D(ArraySeq.unsafeWrapArray(a))
+  private def fromArray2D(a: Array[Array[Float]]): Tensor2D =  Tensor2D(ArraySeq.unsafeWrapArray(a.map(fromArray1D(_))))
+  private def fromArray3D(a: Array[Array[Array[Float]]]): Tensor3D =  Tensor3D(ArraySeq.unsafeWrapArray(a.map(fromArray2D(_))))
+  private def fromArray4D(a: Array[Array[Array[Array[Float]]]]): Tensor4D =  Tensor4D(ArraySeq.unsafeWrapArray(a.map(fromArray3D(_))))
+
+  // This is a bad function with known issues:
+  // - Not generalized, as you can see I am hand-crafting each index here
+  // - Error prone, there is no exception checking
+  // - We assume we _only remove one index_
+  // In the future, look at the Pytorch implementation
+
+  def squeeze(t: Tensor): Tensor = {
+    t match {
+      case t1: Tensor1D => t1
+      case t2: Tensor2D => {
+        // Squeeze from the left to index zero
+        val ss = t2.squeezableIndices - 0
+        print(s"helllooooo??? $ss")
+        var result: ArraySeq[Float] = ArraySeq.empty[Float]
+        for (s <- ss) {
+          print("helllooooo???")
+          s match {
+            case 1 => result = t2.data.collect {
+              case t1: Tensor1D => t1.data
+            }.flatten
+          }
+        }
+        Tensor1D(result)
+      }
+      case x => throw new NotImplementedError(s"squeezing array of dimensions $x is not yet supported")
+     }
+  }
 }

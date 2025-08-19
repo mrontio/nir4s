@@ -39,17 +39,6 @@ object NIRMapper {
   }
 
 
-  private def getTensor(key: String, attrs: Map[String, Any]): Tensor = {
-    val attr = attrs(key)
-    attr.getClass.getName match {
-      case "[F" => Tensor1D(attr.asInstanceOf[Array[Float]])
-      case "[[F" => Tensor2D(attr.asInstanceOf[Array[Array[Float]]])
-      case "[[[F" => Tensor3D(attr.asInstanceOf[Array[Array[Array[Float]]]])
-      case "[[[[F" => Tensor4D(attr.asInstanceOf[Array[Array[Array[Array[Float]]]]])
-      case a => throw new java.text.ParseException(s"Expected to read float tensor but read \"${a}\"", 0)
-    }
-  }
-
   private def parseNode(node: Group, edges: Set[(String, String)]): RawNode = {
     // 1) Collect all attributes into a Map[name -> rawData]
     val attrs: Map[String, Any] =
@@ -90,44 +79,44 @@ object NIRMapper {
         )
       case "LIF" =>
         LIFParams(
-          tau         = getTensor("tau", attrs),
-          r           = getTensor("r", attrs),
-          v_leak      = getTensor("v_leak", attrs),
-          v_threshold = getTensor("v_threshold", attrs),
+          tau         = Tensor.fromHDFMap("tau", attrs),
+          r           = Tensor.fromHDFMap("r", attrs),
+          v_leak      = Tensor.fromHDFMap("v_leak", attrs),
+          v_threshold = Tensor.fromHDFMap("v_threshold", attrs),
         )
 
 
       case "CubaLIF" =>
         CubaLIFParams(
-          tau        = getTensor("tau", attrs),
-          tauSynExc  = getTensor("tauSynExc", attrs),
-          tauSynInh  = getTensor("tauSynInh", attrs),
+          tau        = Tensor.fromHDFMap("tau", attrs),
+          tauSynExc  = Tensor.fromHDFMap("tauSynExc", attrs),
+          tauSynInh  = Tensor.fromHDFMap("tauSynInh", attrs),
         )
 
       case "Linear" =>
         LinearParams(
-          weight      = getTensor("weight", attrs),
+          weight      = Tensor.fromHDFMap("weight", attrs),
         )
 
       case "LI" =>
         LIParams(
-          tau = getTensor("tau", attrs),
-          r = getTensor("r", attrs),
-          v_leak = getTensor("v_leak", attrs),
+          tau = Tensor.fromHDFMap("tau", attrs),
+          r = Tensor.fromHDFMap("r", attrs),
+          v_leak = Tensor.fromHDFMap("v_leak", attrs),
         )
 
       case "Affine" =>
         AffineParams(
-          bias        = getTensor("bias", attrs),
-          weight      = getTensor("weight", attrs),
+          bias        = Tensor.fromHDFMap("bias", attrs),
+          weight      = Tensor.fromHDFMap("weight", attrs),
         )
 
       // case "Conv1d" =>
       //   Conv1DParams(
       //     weights = Conv1DWeights(
-      //       get = getTensor("weight", attrs)
+      //       get = Tensor.fromHDFMap("weight", attrs)
       //     ),
-      //     bias = getTensor("bias", attrs),
+      //     bias = Tensor.fromHDFMap("bias", attrs),
       //     stride = getAttr[Array[Long]]("stride"),
       //     padding = getAttr[Array[Long]]("padding"),
       //     dilation = getAttr[Array[Long]]("dilation"),
