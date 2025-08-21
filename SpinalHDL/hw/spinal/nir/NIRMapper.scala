@@ -77,6 +77,14 @@ object NIRMapper {
         OutputParams(
           shape      = get1DLong("shape").map(_.toInt).toArray,
         )
+
+      case "IF" =>
+        IFParams(
+          r           = Tensor.fromHDFMap("r", attrs),
+          v_reset      = Tensor.fromHDFMap("v_reset", attrs),
+          v_threshold = Tensor.fromHDFMap("v_threshold", attrs),
+        )
+
       case "LIF" =>
         LIFParams(
           tau         = Tensor.fromHDFMap("tau", attrs),
@@ -111,22 +119,30 @@ object NIRMapper {
           weight      = Tensor.fromHDFMap("weight", attrs),
         )
 
-      // case "Conv1d" =>
-      //   Conv1DParams(
-      //     weights = Conv1DWeights(
-      //       get = Tensor.fromHDFMap("weight", attrs)
-      //     ),
-      //     bias = Tensor.fromHDFMap("bias", attrs),
-      //     stride = getAttr[Array[Long]]("stride"),
-      //     padding = getAttr[Array[Long]]("padding"),
-      //     dilation = getAttr[Array[Long]]("dilation"),
-      //     groups = getAttr[Long]("groups"),
-      //     input_shape = getAttr[Long]("input_shape")
-      //   )
+      case "Conv1d" =>
+        Conv1DParams(
+          weights = Conv1DWeights(
+            get = Tensor.fromHDFMap[Float]("weight", attrs).asInstanceOf[Tensor3D[Float]],
+          ),
+          bias = Tensor.fromHDFMap[Float]("bias", attrs).asInstanceOf[Tensor1D[Float]],
+          stride = getAttr[Array[Long]]("stride"),
+          padding = getAttr[Array[Long]]("padding"),
+          dilation = getAttr[Array[Long]]("dilation"),
+          groups = getAttr[Long]("groups"),
+          input_shape = getAttr[Long]("input_shape")
+        )
+
+      case "Flatten" =>
+        FlattenParams(
+          start_dim = getAttr[Long]("start_dim"),
+          end_dim = getAttr[Long]("end_dim"),
+          input_type = Tensor.fromHDFMap[Long]("input_type", attrs)
+        )
+
 
       case other =>
         throw new UnsupportedOperationException(
-          s"NIRMapper: nodeType '$other' in group '${node.getName} not yet supported.'"
+          s"NIRMapper: nodeType '$other' in node '${node.getName}' not yet supported.'"
         )
     }
 

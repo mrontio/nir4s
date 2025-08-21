@@ -104,11 +104,19 @@ object Tensor {
       case "[[F" if ev == reflect.classTag[Float] => fromArray2D(attr.asInstanceOf[Array[Array[T]]])
       case "[[[F" if ev == reflect.classTag[Float] => fromArray3D(attr.asInstanceOf[Array[Array[Array[T]]]])
       case "[[[[F" if ev == reflect.classTag[Float] => fromArray4D(attr.asInstanceOf[Array[Array[Array[Array[T]]]]])
-      case a => throw new java.text.ParseException(s"Expected to read float tensor but read \"${a}\"", 0)
+      case "[J" if ev == reflect.classTag[Long] => fromArray1D(attr.asInstanceOf[Array[T]])
+      case "[[J" if ev == reflect.classTag[Long] => fromArray2D(attr.asInstanceOf[Array[Array[T]]])
+      case "[[[J" if ev == reflect.classTag[Long] => fromArray3D(attr.asInstanceOf[Array[Array[Array[T]]]])
+      case "[[[[J" if ev == reflect.classTag[Long] => fromArray4D(attr.asInstanceOf[Array[Array[Array[Array[T]]]]])
+      case a => throw new java.text.ParseException(s"JVM Array \"${a}\" not yet supported for Tensor conversion", 0)
     }
 
-    // Get rid of singleton dimensions
-    squeeze(t)
+    // Get rid of singleton dimensions (for supported dimensions only for now)
+    t match {
+      case t2: Tensor2D[T] => squeeze(t2)
+      case to              => to
+    }
+
   }
 
   private def fromArray1D[T](a: Array[T]): Tensor1D[T] = Tensor1D(a)

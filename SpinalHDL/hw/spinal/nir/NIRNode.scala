@@ -27,45 +27,26 @@ sealed trait ConvWeights[W] {
 }
 
 final case class Conv1DWeights(
-  get: nir.Matrix3D[Float]
-) extends ConvWeights[nir.Matrix3D[Float]] {
-  def outChannels: nir.Matrix3D[Float] => Set[Int] =
-    w => Set(w.length)
+  get: Tensor3D[Float]
+) extends ConvWeights[Tensor3D[Float]] {
+  def outChannels: Tensor3D[Float] => Set[Int] =
+    w => Set(w.shape(0))
 
-  def inChannels: nir.Matrix3D[Float] => Set[Int] =
-    w => if (w.nonEmpty) Set(w.head.length) else Set.empty
+  def inChannels: Tensor3D[Float] => Set[Int] =
+    w => Set(w.shape(1))
 
-  def kernelSize: nir.Matrix3D[Float] => Set[Int] =
-    w => if (w.nonEmpty && w.head.nonEmpty) Set(w.head.head.length) else Set.empty
+  def kernelSize: Tensor3D[Float] => Set[Int] =
+    w => Set(w.shape(2))
 }
 
 final case class Conv1DParams(
   weights: Conv1DWeights,
-  bias: nir.Matrix1D[Float],
+  bias: Tensor1D[Float],
   stride: Array[Long],
   padding: Array[Long],
   dilation: Array[Long],
   groups: Long,
   input_shape: Long
-) extends NIRParams
-
-final case class LIFParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
-  v_threshold: Tensor[Float],
-) extends NIRParams
-
-final case class LIParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
-) extends NIRParams
-
-final case class CubaLIFParams(
-  tau: Tensor[Float],
-  tauSynExc: Tensor[Float],
-  tauSynInh: Tensor[Float],
 ) extends NIRParams
 
 final case class Conv2dParams(
@@ -77,6 +58,37 @@ final case class Conv2dParams(
   bias: nir.Matrix1D[Float],
   weight: nir.Matrix4D[Float],
   kernelSize: (Int,Int), // Computed from weight
+) extends NIRParams
+
+final case class FlattenParams(
+  start_dim: Long,
+  end_dim: Long,
+  input_type: Tensor[Long]
+) extends NIRParams
+
+final case class LIParams(
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
+) extends NIRParams
+
+final case class IFParams(
+  r: Tensor[Float],
+  v_reset: Tensor[Float],
+  v_threshold: Tensor[Float],
+) extends NIRParams
+
+final case class LIFParams(
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
+  v_threshold: Tensor[Float],
+) extends NIRParams
+
+final case class CubaLIFParams(
+  tau: Tensor[Float],
+  tauSynExc: Tensor[Float],
+  tauSynInh: Tensor[Float],
 ) extends NIRParams
 
 final case class LinearParams(
