@@ -18,7 +18,10 @@ case class NIRNode(
   }
 }
 
-sealed trait NIRParams
+sealed trait NIRParams {
+  def toString: String
+}
+
 sealed trait ConvWeights[W] {
   def get: W
   def outChannels: W => Set[Int]
@@ -47,64 +50,91 @@ final case class Conv1DParams(
   dilation: Tensor1D[Long],
   groups: Long,
   input_shape: Long
-) extends NIRParams
-
-final case class Conv2dParams(
-  dilation: (Float, Float),
-  groups: Int,
-  input_shape: (Int, Int),
-  padding: (Int,Int),
-  stride: (Int,Int),
-  bias: nir.Matrix1D[Float],
-  weight: nir.Matrix4D[Float],
-  kernelSize: (Int,Int), // Computed from weight
-) extends NIRParams
-
+) extends NIRParams {
+  override def toString: String = {
+    s"Conv1D {\n\tweights = $weights,\n\tbias = $bias,\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+  }
+}
 final case class FlattenParams(
   start_dim: Long,
   end_dim: Long,
   input_type: Tensor[Long]
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"FlattenParams {\n\tstart_dim = $start_dim,\n\tend_dim = $end_dim,\n\tinput_type = $input_type\n}"
+  }
+}
 
 final case class LIParams(
   tau: Tensor[Float],
   r: Tensor[Float],
   v_leak: Tensor[Float],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"LIParams {\n\ttau = $tau,\n\tr = $r,\n\tv_leak = $v_leak\n}"
+  }
+}
 
 final case class IFParams(
   r: Tensor[Float],
   v_reset: Tensor[Float],
   v_threshold: Tensor[Float],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"IFParams {\n\tr = $r,\n\tv_reset = $v_reset,\n\tv_threshold = $v_threshold\n}"
+  }
+}
 
 final case class LIFParams(
   tau: Tensor[Float],
   r: Tensor[Float],
   v_leak: Tensor[Float],
   v_threshold: Tensor[Float],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"LIFParams {\n\ttau = $tau,\n\tr = $r,\n\tv_leak = $v_leak,\n\tv_threshold = $v_threshold\n}"
+  }
+}
 
 final case class CubaLIFParams(
   tau: Tensor[Float],
   tauSynExc: Tensor[Float],
   tauSynInh: Tensor[Float],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"CubaLIFParams {\n\ttau = $tau,\n\ttauSynExc = $tauSynExc,\n\ttauSynInh = $tauSynInh\n}"
+  }
+}
 
 final case class LinearParams(
   weight: Tensor1D[Float],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"LinearParams {\n\tweight = $weight\n}"
+  }
+}
 
 final case class AffineParams(
   bias: Tensor[Float],
   weight: Tensor[Float],
-) extends NIRParams
-
+) extends NIRParams {
+  override def toString: String = {
+    s"AffineParams {\n\tbias = $bias,\n\tweight = $weight\n}"
+  }
+}
 
 final case class InputParams(
   shape: Tensor1D[Long],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"InputParams {\n\tshape = $shape\n}"
+  }
+}
 
 final case class OutputParams(
   shape: Tensor1D[Long],
-) extends NIRParams
+) extends NIRParams {
+  override def toString: String = {
+    s"OutputParams {\n\tshape = $shape\n}"
+  }
+}
