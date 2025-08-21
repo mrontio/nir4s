@@ -58,6 +58,36 @@ final case class Conv1DParams(
     s"Conv1D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
+
+final case class Conv2DWeights(
+  get: Tensor4D[Float]
+) extends ConvWeights[Tensor4D[Float]] {
+  def outChannels: List[Int] =
+    List(get.shape(0))
+
+  def inChannels: List[Int] =
+    List(get.shape(1))
+
+  def kernelSize: List[Int] =
+    List(get.shape(2), get.shape(3))
+
+  override def toString: String = s"\n\t\tWeight shape: ${get.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+}
+
+final case class Conv2DParams(
+  weights: Conv2DWeights,
+  bias: Tensor1D[Float],
+  stride: Tensor1D[Long],
+  padding: Tensor1D[Long],
+  dilation: Tensor1D[Long],
+  groups: Long,
+  input_shape: Tensor1D[Long]
+) extends NIRParams {
+  override def toString: String = {
+    s"Conv2D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+  }
+}
+
 final case class FlattenParams(
   start_dim: Long,
   end_dim: Long,
@@ -67,6 +97,17 @@ final case class FlattenParams(
     s"FlattenParams {\n\tstart_dim = $start_dim,\n\tend_dim = $end_dim,\n\tinput_type = $input_type\n}"
   }
 }
+
+final case class SumPool2DParams(
+  kernel_size: Tensor1D[Long],
+  padding: Tensor1D[Long],
+  stride: Tensor1D[Long]
+) extends NIRParams {
+  override def toString: String = {
+    s"FlattenParams {\n\tkernel = $kernel_size,\n\tpadding = $padding,\n\tstride = $stride\n}"
+  }
+}
+
 
 final case class LIParams(
   tau: Tensor[Float],

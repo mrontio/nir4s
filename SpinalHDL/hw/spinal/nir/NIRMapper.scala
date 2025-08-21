@@ -71,7 +71,6 @@ object NIRMapper {
       case "Input" =>
         InputParams(
           shape      = Tensor.fromHDFMap[Long]("shape", attrs).asInstanceOf[Tensor1D[Long]]
-
         )
 
       case "Output" =>
@@ -133,12 +132,34 @@ object NIRMapper {
           input_shape = getAttr[Long]("input_shape")
         )
 
+      case "Conv2d" =>
+        Conv2DParams(
+          weights = Conv2DWeights(
+            get = Tensor.fromHDFMap[Float]("weight", attrs).asInstanceOf[Tensor4D[Float]],
+          ),
+          bias = Tensor.fromHDFMap[Float]("bias", attrs).asInstanceOf[Tensor1D[Float]],
+          stride = Tensor.fromHDFMap[Long]("stride", attrs).asInstanceOf[Tensor1D[Long]],
+          padding = Tensor.fromHDFMap[Long]("padding", attrs).asInstanceOf[Tensor1D[Long]],
+          dilation = Tensor.fromHDFMap[Long]("dilation", attrs).asInstanceOf[Tensor1D[Long]],
+          groups = getAttr[Long]("groups"),
+          input_shape = Tensor.fromHDFMap[Long]("dilation", attrs).asInstanceOf[Tensor1D[Long]],
+        )
+
       case "Flatten" =>
         FlattenParams(
           start_dim = getAttr[Long]("start_dim"),
           end_dim = getAttr[Long]("end_dim"),
           input_type = Tensor.fromHDFMap[Long]("input_type", attrs)
         )
+
+      case "SumPool2d" =>
+        SumPool2DParams(
+          kernel_size = Tensor.fromHDFMap[Long]("kernel_size", attrs).asInstanceOf[Tensor1D[Long]],
+          padding = Tensor.fromHDFMap[Long]("padding", attrs).asInstanceOf[Tensor1D[Long]],
+          stride = Tensor.fromHDFMap[Long]("stride", attrs).asInstanceOf[Tensor1D[Long]]
+        )
+
+
 
 
       case other =>
