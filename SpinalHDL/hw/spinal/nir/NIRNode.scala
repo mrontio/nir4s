@@ -24,26 +24,25 @@ sealed trait NIRParams {
 
 sealed trait ConvWeights[W] {
   def get: W
-  def outChannels: Set[Int]
-  def inChannels: Set[Int]
-  def kernelSize: Set[Int]
+  def outChannels: List[Int]
+  def inChannels: List[Int]
+  def kernelSize: List[Int]
   def toString: String
 }
 
 final case class Conv1DWeights(
   get: Tensor3D[Float]
 ) extends ConvWeights[Tensor3D[Float]] {
-  def outChannels: Set[Int] =
-    Set(get.shape(0))
+  def outChannels: List[Int] =
+    List(get.shape(0))
 
-  def inChannels: Set[Int] =
-    Set(get.shape(1))
+  def inChannels: List[Int] =
+    List(get.shape(1))
 
-  def kernelSize: Set[Int] =
-    Set(get.shape(2))
+  def kernelSize: List[Int] =
+    List(get.shape(2))
 
   override def toString: String = s"\n\t\tWeight shape: ${get.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
-
 }
 
 final case class Conv1DParams(
@@ -56,7 +55,7 @@ final case class Conv1DParams(
   input_shape: Long
 ) extends NIRParams {
   override def toString: String = {
-    s"Conv1D {\n\tweights = $weights,\n\tbias = $bias,\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+    s"Conv1D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 final case class FlattenParams(
@@ -75,7 +74,7 @@ final case class LIParams(
   v_leak: Tensor[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"LIParams {\n\ttau = $tau,\n\tr = $r,\n\tv_leak = $v_leak\n}"
+    s"LIParams {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
   }
 }
 
@@ -85,7 +84,7 @@ final case class IFParams(
   v_threshold: Tensor[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"IFParams {\n\tr = $r,\n\tv_reset = $v_reset,\n\tv_threshold = $v_threshold\n}"
+    s"IFParams {\n\tr = ${r.shape},\n\tv_reset = ${v_reset.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
   }
 }
 
@@ -96,7 +95,7 @@ final case class LIFParams(
   v_threshold: Tensor[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"LIFParams {\n\ttau = $tau,\n\tr = $r,\n\tv_leak = $v_leak,\n\tv_threshold = $v_threshold\n}"
+    s"LIFParams {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
   }
 }
 
@@ -106,7 +105,7 @@ final case class CubaLIFParams(
   tauSynInh: Tensor[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"CubaLIFParams {\n\ttau = $tau,\n\ttauSynExc = $tauSynExc,\n\ttauSynInh = $tauSynInh\n}"
+    s"CubaLIFParams {\n\ttau = ${tau.shape},\n\ttauSynExc = ${tauSynExc.shape},\n\ttauSynInh = ${tauSynInh.shape}\n}"
   }
 }
 
@@ -114,7 +113,7 @@ final case class LinearParams(
   weight: Tensor1D[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"LinearParams {\n\tweight = $weight\n}"
+    s"LinearParams {\n\tweight = ${weight.shape}\n}"
   }
 }
 
@@ -123,7 +122,7 @@ final case class AffineParams(
   weight: Tensor[Float],
 ) extends NIRParams {
   override def toString: String = {
-    s"AffineParams {\n\tbias = $bias,\n\tweight = $weight\n}"
+    s"AffineParams {\n\tbias = ${bias.shape},\n\tweight = ${weight.shape}\n}"
   }
 }
 
