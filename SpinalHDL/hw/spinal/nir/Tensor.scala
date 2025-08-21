@@ -30,6 +30,7 @@ case class Tensor1D[T](data: Array[T]) extends Tensor[T] {
   override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
 
   def apply(i: Int): T = data(i)
+  def length: Int = data.length
 
 }
 
@@ -48,16 +49,17 @@ case class Tensor2D[T](data: Array[Tensor1D[T]]) extends Tensor[T] {
 
 
   def apply(i: Int): Tensor1D[T] = data(i)
+  def length: Int = data.length
 
-    override def map[B: ClassTag](f: T => B): Tensor2D[B] =
-      Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]))
+  override def map[B: ClassTag](f: T => B): Tensor2D[B] =
+    Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]))
 
-    override def toList: List[List[T]] =
-      data.collect { case t1: Tensor1D[T] => t1.toList }.toList
+  override def toList: List[List[T]] =
+    data.collect { case t1: Tensor1D[T] => t1.toList }.toList
 
-    override def toString: String = "Tensor2D(" + data.collect {
-      case t1: Tensor1D[T] => t1.toString
-    }.mkString(", ") + ")"
+  override def toString: String = "Tensor2D(" + data.collect {
+    case t1: Tensor1D[T] => t1.toString
+  }.mkString(", ") + ")"
 
 }
 
@@ -71,6 +73,8 @@ object Tensor2D {
 
 case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
   def apply(i: Int): Tensor2D[T] = data(i)
+  def length: Int = data.length
+
 
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
@@ -78,15 +82,15 @@ case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
       case None => Seq(0, 0)
     })
 
-    override def map[B: ClassTag](f: T => B): Tensor3D[B] =
-      Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]))
+  override def map[B: ClassTag](f: T => B): Tensor3D[B] =
+    Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]))
 
-    override def toList: List[List[List[T]]] =
-      data.collect { case t2: Tensor2D[T] => t2.toList }.toList
+  override def toList: List[List[List[T]]] =
+    data.collect { case t2: Tensor2D[T] => t2.toList }.toList
 
-    override def toString: String = "Tensor3D(" + data.collect {
-      case t2: Tensor2D[T] => t2.toString
-    }.mkString(", ") + ")"
+  override def toString: String = "Tensor3D(" + data.collect {
+    case t2: Tensor2D[T] => t2.toString
+  }.mkString(", ") + ")"
 }
 
 object Tensor3D {
@@ -105,6 +109,7 @@ case class Tensor4D[T](data: Array[Tensor3D[T]]) extends Tensor[T] {
     })
 
   def apply(i: Int): Tensor3D[T] = data(i)
+  def length: Int = data.length
 
   override def map[B: ClassTag](f: T => B): Tensor4D[B] =
     Tensor4D[B](data.map(_.map(f).asInstanceOf[Tensor3D[B]]))
