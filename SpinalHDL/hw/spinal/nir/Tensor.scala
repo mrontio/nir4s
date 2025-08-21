@@ -109,7 +109,6 @@ object Tensor {
 
     // Get rid of singleton dimensions
     squeeze(t)
-    //t
   }
 
   private def fromArray1D[T](a: Array[T]): Tensor1D[T] = Tensor1D(a)
@@ -117,12 +116,13 @@ object Tensor {
   private def fromArray3D[T](a: Array[Array[Array[T]]]): Tensor3D[T] =  Tensor3D(a.map(fromArray2D[T](_)))
   private def fromArray4D[T](a: Array[Array[Array[Array[T]]]]): Tensor4D[T] =  Tensor4D(a.map(fromArray3D[T](_)))
 
-  // This is a bad function with known issues:
+
+
+  // This is an incomplete function with known issues:
   // - Not generalized, as you can see I am hand-crafting each index here
   // - Error prone, there is no exception checking
-  // - We assume we _only remove one index_
-  // In the future, look at the Pytorch implementation
-
+  // - We assume we _only remove one index_ for the return type.
+  // This function needs a rewrite once we have a seperate indexer type
   def squeeze[T: ClassTag](t: Tensor[T]): Tensor[T] = {
     t match {
       case t1: Tensor1D[T] => t1
@@ -139,7 +139,7 @@ object Tensor {
         }
         Tensor1D(result)
       }
-      case x => throw new NotImplementedError(s"squeezing array of dimensions $x is not yet supported")
+      case x => throw new NotImplementedError(s"squeezing array of dimensions ${x.rank} is not yet supported")
      }
   }
 }
