@@ -17,6 +17,8 @@ sealed trait Tensor[T] {
 
   // TODO: This is dirty, look at how other libs do it.
   def toList: List[_]
+
+  def toString: String
 }
 
 case class Tensor1D[T](data: Array[T]) extends Tensor[T] {
@@ -24,6 +26,7 @@ case class Tensor1D[T](data: Array[T]) extends Tensor[T] {
 
   override def map[B: ClassTag](f: T => B): Tensor1D[B] =  Tensor1D[B](data.map(f))
   override def toList: List[T] = data.toList
+  override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
 }
 
 object Tensor1D {
@@ -44,6 +47,11 @@ case class Tensor2D[T](data: Array[Tensor1D[T]]) extends Tensor[T] {
 
     override def toList: List[List[T]] =
       data.collect { case t1: Tensor1D[T] => t1.toList }.toList
+
+    override def toString: String = "Tensor2D(" + data.collect {
+      case t1: Tensor1D[T] => t1.toString
+    }.mkString(", ") + ")"
+
 }
 
 object Tensor2D {
@@ -66,6 +74,10 @@ case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
 
     override def toList: List[List[List[T]]] =
       data.collect { case t2: Tensor2D[T] => t2.toList }.toList
+
+    override def toString: String = "Tensor3D(" + data.collect {
+      case t2: Tensor2D[T] => t2.toString
+    }.mkString(", ") + ")"
 }
 
 object Tensor3D {
@@ -88,6 +100,10 @@ case class Tensor4D[T](data: Array[Tensor3D[T]]) extends Tensor[T] {
 
     override def toList: List[List[List[List[T]]]] =
       data.collect { case t3: Tensor3D[T] => t3.toList }.toList
+
+    override def toString: String = "Tensor4D(" + data.collect {
+      case t3: Tensor3D[T] => t3.toString
+    }.mkString(", ") + ")"
 }
 
 object Tensor4D {
