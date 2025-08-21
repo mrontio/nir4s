@@ -42,9 +42,9 @@ final case class Conv1DWeights(
 final case class Conv1DParams(
   weights: Conv1DWeights,
   bias: Tensor1D[Float],
-  stride: Array[Long],
-  padding: Array[Long],
-  dilation: Array[Long],
+  stride: Tensor1D[Long],
+  padding: Tensor1D[Long],
+  dilation: Tensor1D[Long],
   groups: Long,
   input_shape: Long
 ) extends NIRParams
@@ -92,7 +92,7 @@ final case class CubaLIFParams(
 ) extends NIRParams
 
 final case class LinearParams(
-  weight: Tensor[Float],
+  weight: Tensor1D[Float],
 ) extends NIRParams
 
 final case class AffineParams(
@@ -102,9 +102,9 @@ final case class AffineParams(
 
 
 final case class InputParams(
-  shape: Array[Int],
+  shape: Tensor1D[Long],
 ) extends NIRParams
 
 final case class OutputParams(
-  shape: Array[Int],
+  shape: Tensor1D[Long],
 ) extends NIRParams

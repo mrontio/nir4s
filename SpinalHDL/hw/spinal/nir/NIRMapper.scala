@@ -70,12 +70,13 @@ object NIRMapper {
     val params = attrs("type").asInstanceOf[String] match {
       case "Input" =>
         InputParams(
-          shape = get1DLong("shape").map(_.toInt).toArray,
+          shape      = Tensor.fromHDFMap[Long]("shape", attrs).asInstanceOf[Tensor1D[Long]]
+
         )
 
       case "Output" =>
         OutputParams(
-          shape      = get1DLong("shape").map(_.toInt).toArray,
+          shape      = Tensor.fromHDFMap[Long]("shape", attrs).asInstanceOf[Tensor1D[Long]]
         )
 
       case "IF" =>
@@ -103,7 +104,7 @@ object NIRMapper {
 
       case "Linear" =>
         LinearParams(
-          weight      = Tensor.fromHDFMap("weight", attrs),
+          weight = Tensor.fromHDFMap[Float]("weight", attrs).asInstanceOf[Tensor1D[Float]],
         )
 
       case "LI" =>
@@ -125,9 +126,9 @@ object NIRMapper {
             get = Tensor.fromHDFMap[Float]("weight", attrs).asInstanceOf[Tensor3D[Float]],
           ),
           bias = Tensor.fromHDFMap[Float]("bias", attrs).asInstanceOf[Tensor1D[Float]],
-          stride = getAttr[Array[Long]]("stride"),
-          padding = getAttr[Array[Long]]("padding"),
-          dilation = getAttr[Array[Long]]("dilation"),
+          stride = Tensor.fromHDFMap[Long]("stride", attrs).asInstanceOf[Tensor1D[Long]],
+          padding = Tensor.fromHDFMap[Long]("padding", attrs).asInstanceOf[Tensor1D[Long]],
+          dilation = Tensor.fromHDFMap[Long]("dilation", attrs).asInstanceOf[Tensor1D[Long]],
           groups = getAttr[Long]("groups"),
           input_shape = getAttr[Long]("input_shape")
         )
