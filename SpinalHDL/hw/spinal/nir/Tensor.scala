@@ -5,6 +5,7 @@ import scala.reflect.ClassTag
 
 // Base trait / abstract class
 sealed trait Tensor[T] {
+
   def shape: Seq[Int]
   def rank: Int = shape.length
 
@@ -27,6 +28,9 @@ case class Tensor1D[T](data: Array[T]) extends Tensor[T] {
   override def map[B: ClassTag](f: T => B): Tensor1D[B] =  Tensor1D[B](data.map(f))
   override def toList: List[T] = data.toList
   override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
+
+  def apply(i: Int): T = data(i)
+
 }
 
 object Tensor1D {
@@ -41,6 +45,9 @@ case class Tensor2D[T](data: Array[Tensor1D[T]]) extends Tensor[T] {
       case Some(t: Tensor1D[T]) => t.shape
       case None => Seq(0)
     })
+
+
+  def apply(i: Int): Tensor1D[T] = data(i)
 
     override def map[B: ClassTag](f: T => B): Tensor2D[B] =
       Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]))
@@ -63,6 +70,8 @@ object Tensor2D {
 }
 
 case class Tensor3D[T](data: Array[Tensor2D[T]]) extends Tensor[T] {
+  def apply(i: Int): Tensor2D[T] = data(i)
+
   override def shape: Seq[Int] =
     Seq(data.length) ++ (data.headOption match {
       case Some(t: Tensor2D[T]) => t.shape
@@ -95,15 +104,17 @@ case class Tensor4D[T](data: Array[Tensor3D[T]]) extends Tensor[T] {
       case None => Seq(0, 0, 0)
     })
 
-    override def map[B: ClassTag](f: T => B): Tensor4D[B] =
-      Tensor4D[B](data.map(_.map(f).asInstanceOf[Tensor3D[B]]))
+  def apply(i: Int): Tensor3D[T] = data(i)
 
-    override def toList: List[List[List[List[T]]]] =
-      data.collect { case t3: Tensor3D[T] => t3.toList }.toList
+  override def map[B: ClassTag](f: T => B): Tensor4D[B] =
+    Tensor4D[B](data.map(_.map(f).asInstanceOf[Tensor3D[B]]))
 
-    override def toString: String = "Tensor4D(" + data.collect {
-      case t3: Tensor3D[T] => t3.toString
-    }.mkString(", ") + ")"
+  override def toList: List[List[List[List[T]]]] =
+    data.collect { case t3: Tensor3D[T] => t3.toList }.toList
+
+  override def toString: String = "Tensor4D(" + data.collect {
+    case t3: Tensor3D[T] => t3.toString
+  }.mkString(", ") + ")"
 }
 
 object Tensor4D {
@@ -124,6 +135,10 @@ object Tensor {
       case "[[J" if ev == reflect.classTag[Long] => fromArray2D(attr.asInstanceOf[Array[Array[T]]])
       case "[[[J" if ev == reflect.classTag[Long] => fromArray3D(attr.asInstanceOf[Array[Array[Array[T]]]])
       case "[[[[J" if ev == reflect.classTag[Long] => fromArray4D(attr.asInstanceOf[Array[Array[Array[Array[T]]]]])
+      case "[I" if ev == reflect.classTag[Int] => fromArray1D(attr.asInstanceOf[Array[T]])
+      case "[[I" if ev == reflect.classTag[Int] => fromArray2D(attr.asInstanceOf[Array[Array[T]]])
+      case "[[[I" if ev == reflect.classTag[Int] => fromArray3D(attr.asInstanceOf[Array[Array[Array[T]]]])
+      case "[[[[I" if ev == reflect.classTag[Int] => fromArray4D(attr.asInstanceOf[Array[Array[Array[Array[T]]]]])
       case a => throw new java.text.ParseException(s"JVM Array \"${a}\" not yet supported for Tensor conversion", 0)
     }
 
