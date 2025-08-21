@@ -14,7 +14,7 @@ case class NIRNode(
 ) {
   override def toString: String = {
     val prevIds = previous.map(_.id).mkString("{", ", ", "}")
-    s"NIRNode(id=$id, previous=$prevIds, params=$params)"
+    s"$id: previous=$prevIds, params=$params)"
   }
 }
 
@@ -24,22 +24,26 @@ sealed trait NIRParams {
 
 sealed trait ConvWeights[W] {
   def get: W
-  def outChannels: W => Set[Int]
-  def inChannels: W => Set[Int]
-  def kernelSize: W => Set[Int]
+  def outChannels: Set[Int]
+  def inChannels: Set[Int]
+  def kernelSize: Set[Int]
+  def toString: String
 }
 
 final case class Conv1DWeights(
   get: Tensor3D[Float]
 ) extends ConvWeights[Tensor3D[Float]] {
-  def outChannels: Tensor3D[Float] => Set[Int] =
-    w => Set(w.shape(0))
+  def outChannels: Set[Int] =
+    Set(get.shape(0))
 
-  def inChannels: Tensor3D[Float] => Set[Int] =
-    w => Set(w.shape(1))
+  def inChannels: Set[Int] =
+    Set(get.shape(1))
 
-  def kernelSize: Tensor3D[Float] => Set[Int] =
-    w => Set(w.shape(2))
+  def kernelSize: Set[Int] =
+    Set(get.shape(2))
+
+  override def toString: String = s"\n\t\tWeight shape: ${get.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+
 }
 
 final case class Conv1DParams(

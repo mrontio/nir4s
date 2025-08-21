@@ -7,6 +7,7 @@ case class NIRGraph(nodes: Set[NIRNode]) {
 
 
   def getNode(id: String): NIRNode = nodeMap(id)
+  override def toString: String = NIRGraph.getStructureString(output)
 }
 
 object NIRGraph {
@@ -44,6 +45,15 @@ object NIRGraph {
         convertRawNodes(nodes, newNode) + newNode
       case None =>
         throw new RuntimeException("error: multiple connections not yet supported or no connections found.")
+    }
+  }
+
+  private def getStructureString(node: NIRNode): String = {
+    node.params match {
+      case i: InputParams => s"${node.id}: $i"
+      case x => node.previous.collectFirst {
+        case node: NIRNode => getStructureString(node)
+      } + s"${node.id}: $x"
     }
   }
 }
