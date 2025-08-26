@@ -2,7 +2,8 @@ package nir
 
 case class NIRGraph(nodes: Set[NIRNode]) {
   val input: NIRNode = nodes.find(_.previous.size == 0).get
-  val output: NIRNode = nodes.find(_.params.nirType == "Output").get
+  val output: NIRNode = nodes.find(_.params.nirType == "Output")
+    .getOrElse(throw new Exception("NIR Graph does not contain node type 'Output', please re-generate."))
   val nodeMap: Map[String, NIRNode] = nodes.map(node => node.id -> node).toMap
 
 
@@ -24,7 +25,9 @@ object NIRGraph {
   }
 
   def fromRaw(rawNodes: Set[RawNode]): NIRGraph = {
-    val topRaw: RawNode = rawNodes.find(_.params.nirType == "Input").get
+    val topRaw = rawNodes.find(_.params.nirType == "Input")
+      .getOrElse(throw new Exception("NIR Graph does not contain node type 'Input', please re-generate."))
+
     val top: NIRNode = NIRNode(topRaw.id, Set.empty[NIRNode], topRaw.params)
     // TODO: put initial case into recursive function
     val nodes = Set(top) ++ convertRawNodes(rawNodes, top)
