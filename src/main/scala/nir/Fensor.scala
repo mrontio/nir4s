@@ -3,11 +3,50 @@ package nir
 import io.jhdf.api.{Dataset}
 import scala.reflect.ClassTag
 
+sealed trait RangeTree
+case class Leaf(begin: Int, end: Int) extends RangeTree
+case class Branch(children: List[RangeTree]) extends RangeTree
+
+
+class Counter(var value: Int) {
+  def next(): Int = {
+    val current = value
+    value += 1
+    current
+  }
+
+  def plus(x: Int): (Int, Int) = {
+    val current = value
+    val plussed = current + x
+    value = plussed
+    (current, plussed)
+  }
+}
 
 case class Indexer(shape: List[Int]) {
   def rank: Int = shape.length
   def size: Int = shape.reduce(_ * _)
+  def rangeTree: RangeTree = buildTree(shape)
 
+  def buildTree(shape: List[Int]): RangeTree = {
+    val counter = new Counter(0)
+
+    def build(dims: List[Int]): RangeTree = dims match {
+      case Nil =>
+        val idx = counter.next()
+        Leaf(idx, idx + 1)
+
+      case dim :: Nil =>
+        val (b, e) = counter.plus(dim)
+        Leaf(b, e)
+
+      case h :: t =>
+        val children = (0 until h).map(_ => build(t)).toList
+        Branch(children)
+    }
+
+    build(shape)
+  }
 
   private def idx(dims: List[Int]): Int = {
     // Row-major order (like numpy), (0, 0, 1) -> 1
@@ -58,6 +97,16 @@ class Fensor[D](data: Array[D], idx: Indexer) {
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): Fensor[D] = new Fensor[D](data, idx.reshape(newshape))
   def map[B: ClassTag](f: D => B): Fensor[B] = new Fensor[B](data.map(f), idx)
+
+  private def toNestedList(tree: RangeTree): Any = tree match {
+    case Leaf(b, e) =>
+      data.slice(b, e).toList
+
+    case Branch(children) =>
+      children.map(toNestedList)
+  }
+
+  def toList: Any = toNestedList(idx.rangeTree)
 }
 
 object Fensor {
@@ -65,6 +114,7 @@ object Fensor {
     val i = Indexer(shape)
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
     new Fensor[D](a, i)
+
   }
 
   private def flattenArray[T: ClassTag](a: Array[Object], dims: List[Int]): Array[T] = {
@@ -85,7 +135,6 @@ object Fensor {
 
   def apply(d: Dataset) = {
     val idx = Indexer(d.getDimensions.toList)
-    println(idx)
     d.getDataType.getJavaType.toString match {
       case "float" => new Fensor(flattenDatasetArray[Float](d), idx)
       case "int"   => new Fensor(flattenDatasetArray[Int](d), idx)

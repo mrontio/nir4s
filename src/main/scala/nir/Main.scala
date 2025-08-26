@@ -21,9 +21,9 @@ object Main extends App {
     }
   }
 
-  val f = Fensor(d)
+  // val f = Fensor(d)
+  val f = Fensor(Array(1, 2, 3, 4, 5, 6), List(2, 3))
 
-
-  println(f(15, 15, 2))
+  println(f.toList)
 
 }
