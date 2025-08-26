@@ -19,6 +19,7 @@ case class NIRNode(
 }
 
 sealed trait NIRParams {
+  def nirType: String
   def toString: String
 }
 
@@ -54,6 +55,7 @@ final case class Conv1DParams(
   groups: Long,
   input_shape: Long
 ) extends NIRParams {
+  override def nirType: String = "Conv1d"
   override def toString: String = {
     s"Conv1D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
@@ -83,8 +85,9 @@ final case class Conv2DParams(
   groups: Long,
   input_shape: Tensor1D[Long]
 ) extends NIRParams {
+  override def nirType: String = "Conv2d"
   override def toString: String = {
-    s"Conv2D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+    s"$nirType {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 
@@ -93,8 +96,9 @@ final case class FlattenParams(
   end_dim: Long,
   input_type: Tensor[Long]
 ) extends NIRParams {
+  override def nirType: String = "Flatten"
   override def toString: String = {
-    s"FlattenParams {\n\tstart_dim = $start_dim,\n\tend_dim = $end_dim,\n\tinput_type = $input_type\n}"
+    s"$nirType {\n\tstart_dim = $start_dim,\n\tend_dim = $end_dim,\n\tinput_type = $input_type\n}"
   }
 }
 
@@ -103,8 +107,9 @@ final case class SumPool2DParams(
   padding: Tensor1D[Long],
   stride: Tensor1D[Long]
 ) extends NIRParams {
+  override def nirType: String = "SumPool2d"
   override def toString: String = {
-    s"FlattenParams {\n\tkernel = $kernel_size,\n\tpadding = $padding,\n\tstride = $stride\n}"
+    s"$nirType {\n\tkernel = $kernel_size,\n\tpadding = $padding,\n\tstride = $stride\n}"
   }
 }
 
@@ -114,8 +119,9 @@ final case class LIParams(
   r: Tensor[Float],
   v_leak: Tensor[Float],
 ) extends NIRParams {
+  override def nirType: String = "LI"
   override def toString: String = {
-    s"LIParams {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
+    s"$nirType {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
   }
 }
 
@@ -124,8 +130,9 @@ final case class IFParams(
   v_reset: Tensor[Float],
   v_threshold: Tensor[Float],
 ) extends NIRParams {
+  override def nirType: String = "IF"
   override def toString: String = {
-    s"IFParams {\n\tr = ${r.shape},\n\tv_reset = ${v_reset.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
+    s"$nirType {\n\tr = ${r.shape},\n\tv_reset = ${v_reset.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
   }
 }
 
@@ -135,8 +142,9 @@ final case class LIFParams(
   v_leak: Tensor[Float],
   v_threshold: Tensor[Float],
 ) extends NIRParams {
+  override def nirType: String = "LIF"
   override def toString: String = {
-    s"LIFParams {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
+    s"$nirType {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
   }
 }
 
@@ -145,16 +153,18 @@ final case class CubaLIFParams(
   tauSynExc: Tensor[Float],
   tauSynInh: Tensor[Float],
 ) extends NIRParams {
+  override def nirType: String = "CubaLIF"
   override def toString: String = {
-    s"CubaLIFParams {\n\ttau = ${tau.shape},\n\ttauSynExc = ${tauSynExc.shape},\n\ttauSynInh = ${tauSynInh.shape}\n}"
+    s"$nirType {\n\ttau = ${tau.shape},\n\ttauSynExc = ${tauSynExc.shape},\n\ttauSynInh = ${tauSynInh.shape}\n}"
   }
 }
 
 final case class LinearParams(
   weight: Tensor1D[Float],
 ) extends NIRParams {
+  override def nirType: String = "Linear"
   override def toString: String = {
-    s"LinearParams {\n\tweight = ${weight.shape}\n}"
+    s"$nirType {\n\tweight = ${weight.shape}\n}"
   }
 }
 
@@ -162,23 +172,26 @@ final case class AffineParams(
   bias: Tensor[Float],
   weight: Tensor[Float],
 ) extends NIRParams {
+  override def nirType: String = "Affine"
   override def toString: String = {
-    s"AffineParams {\n\tbias = ${bias.shape},\n\tweight = ${weight.shape}\n}"
+    s"$nirType {\n\tbias = ${bias.shape},\n\tweight = ${weight.shape}\n}"
   }
 }
 
 final case class InputParams(
   shape: Tensor1D[Long],
 ) extends NIRParams {
+  override def nirType: String = "Input"
   override def toString: String = {
-    s"InputParams {\n\tshape = $shape\n}"
+    s"$nirType {\n\tshape = $shape\n}"
   }
 }
 
 final case class OutputParams(
   shape: Tensor1D[Long],
 ) extends NIRParams {
+  override def nirType: String = "Output"
   override def toString: String = {
-    s"OutputParams {\n\tshape = $shape\n}"
+    s"$nirType {\n\tshape = $shape\n}"
   }
 }
