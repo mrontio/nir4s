@@ -3,6 +3,7 @@ package nir
 
 case class Indexer(shape: List[Int]) {
   def rank: Int = shape.length
+  def size: Int = shape.reduce(_ * _)
 
 
   private def idx(dims: List[Int]): Int = {
@@ -38,12 +39,19 @@ case class Indexer(shape: List[Int]) {
 
   def squeeze(): Indexer = {
     val ss = squeeze(shape)
-    println(ss)
     Indexer(ss)
+  }
+
+  def reshape(newshape: List[Int]): Indexer = {
+    val newsize = newshape.reduce(_ * _)
+    if (newsize != size) throw new IllegalArgumentException(s"New shape has size $newsize but expected $size.")
+
+    Indexer(newshape)
   }
 }
 
 
 class Fensor[D](data: Array[D], idx: Indexer) {
   def apply(indices: Int*) = data(idx(indices))
+  def reshape(newshape: List[Int]): Fensor[D] = new Fensor[D](data, idx.reshape(newshape))
 }
