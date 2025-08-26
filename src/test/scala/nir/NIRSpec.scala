@@ -1,0 +1,41 @@
+package nir
+
+import munit.FunSuite
+import java.io.File
+import java.nio.file.{Files, Paths}
+import scala.jdk.CollectionConverters._
+
+
+class NIRSpec extends FunSuite {
+
+  // Root directory where samples are stored
+  val sampleRoot = Paths.get("src/test/scala/nir/samples")
+
+  // Find all .nir files and group them by the first-level folder (e.g., 'li', 'foo')
+  val nirFilesByGroup: Map[String, List[String]] = {
+    if (Files.exists(sampleRoot)) {
+      Files.walk(sampleRoot)
+        .iterator()
+        .asScala
+        .filter(p => p.toString.endsWith("/network.nir"))
+        .toList
+        .groupBy { path =>
+          sampleRoot.relativize(path).iterator().next().toString  // 'li', 'foo', etc.
+        }
+        .view
+        .mapValues(_.map(_.toString))
+        .toMap
+    } else {
+      println(s"No files found in $sampleRoot directory.")
+      Map.empty
+    }
+  }
+
+  // Dynamically create tests based on the folder name
+  for ((group: String, files: List[String]) <- nirFilesByGroup) {
+    test(s"NIR file: samples/$group/network.nir") {
+      val file = new File(files(0))
+      val g: NIRGraph = NIRMapper.loadGraph(file)
+    }
+  }
+}
