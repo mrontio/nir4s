@@ -32,9 +32,11 @@ class NIRSpec extends FunSuite {
   }
 
   // Dynamically create tests based on the folder name
-  for ((group: String, files: List[String]) <- nirFilesByGroup) {
+  for {
+    (group: String, files: List[String]) <- nirFilesByGroup
+    file = new File(files(0))
+  } {
     test(s"NIR file: samples/$group/network.nir") {
-      val file = new File(files(0))
       val g: NIRGraph = NIRMapper.loadGraph(file)
     }
   }
