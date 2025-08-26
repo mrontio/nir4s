@@ -57,6 +57,7 @@ case class Indexer(shape: List[Int]) {
 class Fensor[D](data: Array[D], idx: Indexer) {
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): Fensor[D] = new Fensor[D](data, idx.reshape(newshape))
+  def map[B: ClassTag](f: D => B): Fensor[B] = new Fensor[B](data.map(f), idx)
 }
 
 object Fensor {
