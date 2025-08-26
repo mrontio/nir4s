@@ -5,7 +5,7 @@ ThisBuild / scalaVersion     := "2.13.14"
 lazy val nir = (project in file("."))
   .settings(
     name := "nir",
-    scalaVersion     := "2.13.14"
+    scalaVersion     := "2.13.14",
     libraryDependencies += munit % Test
   )
 
