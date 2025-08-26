@@ -93,10 +93,10 @@ case class Indexer(shape: List[Int]) {
 }
 
 
-class Fensor[D](data: Array[D], idx: Indexer) {
+class Tensor[D](data: Array[D], idx: Indexer) {
   def apply(indices: Int*) = data(idx(indices))
-  def reshape(newshape: List[Int]): Fensor[D] = new Fensor[D](data, idx.reshape(newshape))
-  def map[B: ClassTag](f: D => B): Fensor[B] = new Fensor[B](data.map(f), idx)
+  def reshape(newshape: List[Int]): Tensor[D] = new Tensor[D](data, idx.reshape(newshape))
+  def map[B: ClassTag](f: D => B): Tensor[B] = new Tensor[B](data.map(f), idx)
 
   private def toNestedList(tree: RangeTree): Any = tree match {
     case Leaf(b, e) =>
@@ -109,11 +109,11 @@ class Fensor[D](data: Array[D], idx: Indexer) {
   def toList: Any = toNestedList(idx.rangeTree)
 }
 
-object Fensor {
-  def apply[D](a: Array[D], shape: List[Int]): Fensor[D] = {
+object Tensor {
+  def apply[D](a: Array[D], shape: List[Int]): Tensor[D] = {
     val i = Indexer(shape)
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
-    new Fensor[D](a, i)
+    new Tensor[D](a, i)
 
   }
 
@@ -136,9 +136,9 @@ object Fensor {
   def apply(d: Dataset) = {
     val idx = Indexer(d.getDimensions.toList)
     d.getDataType.getJavaType.toString match {
-      case "float" => new Fensor(flattenDatasetArray[Float](d), idx)
-      case "int"   => new Fensor(flattenDatasetArray[Int](d), idx)
-      case "long"  => new Fensor(flattenDatasetArray[Long](d), idx)
+      case "float" => new Tensor(flattenDatasetArray[Float](d), idx)
+      case "int"   => new Tensor(flattenDatasetArray[Int](d), idx)
+      case "long"  => new Tensor(flattenDatasetArray[Long](d), idx)
       case o => throw new java.text.ParseException(s"Java type \"${o}\" not yet supported for Tensor conversion", 0)
     }
 
