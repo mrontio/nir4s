@@ -94,6 +94,7 @@ case class Indexer(shape: List[Int]) {
 
 
 class Tensor[D](data: Array[D], idx: Indexer) {
+  val shape = idx.shape
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): Tensor[D] = new Tensor[D](data, idx.reshape(newshape))
   def map[B: ClassTag](f: D => B): Tensor[B] = new Tensor[B](data.map(f), idx)

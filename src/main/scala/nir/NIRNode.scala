@@ -31,63 +31,54 @@ sealed trait ConvWeights[W] {
   def toString: String
 }
 
-final case class Conv1DWeights(
-  get: Tensor3D[Float]
-) extends ConvWeights[Tensor3D[Float]] {
-  def outChannels: List[Int] =
-    List(get.shape(0))
-
-  def inChannels: List[Int] =
-    List(get.shape(1))
-
-  def kernelSize: List[Int] =
-    List(get.shape(2))
-
-  override def toString: String = s"\n\t\tWeight shape: ${get.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
-}
 
 final case class Conv1DParams(
-  weights: Conv1DWeights,
-  bias: Tensor1D[Float],
-  stride: Tensor1D[Long],
-  padding: Tensor1D[Long],
-  dilation: Tensor1D[Long],
+  weight: Tensor[Float],
+  bias: Tensor[Float],
+  stride: Tensor[Long],
+  padding: Tensor[Long],
+  dilation: Tensor[Long],
   groups: Long,
-  input_shape: Long
+  input_shape: Long,
 ) extends NIRParams {
+  def outChannels: List[Int] =
+    List(weight.shape(0))
+
+  def inChannels: List[Int] =
+    List(weight.shape(1))
+
+  def kernelSize: List[Int] =
+    List(weight.shape(2))
+
   override def nirType: String = "Conv1d"
   override def toString: String = {
-    s"Conv1D {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+    val weightString = s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+    s"Conv1D {\n\tweight = $weightString,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 
-final case class Conv2DWeights(
-  get: Tensor4D[Float]
-) extends ConvWeights[Tensor4D[Float]] {
-  def outChannels: List[Int] =
-    List(get.shape(0))
+final case class Conv2DParams(
+  weight: Tensor[Float],
+  bias: Tensor[Float],
+  stride: Tensor[Long],
+  padding: Tensor[Long],
+  dilation: Tensor[Long],
+  groups: Long,
+  input_shape: Tensor[Long]
+) extends NIRParams {
+    def outChannels: List[Int] =
+    List(weight.shape(0))
 
   def inChannels: List[Int] =
-    List(get.shape(1))
+    List(weight.shape(1))
 
   def kernelSize: List[Int] =
-    List(get.shape(2), get.shape(3))
+    List(weight.shape(2), weight.shape(3))
 
-  override def toString: String = s"\n\t\tWeight shape: ${get.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
-}
-
-final case class Conv2DParams(
-  weights: Conv2DWeights,
-  bias: Tensor1D[Float],
-  stride: Tensor1D[Long],
-  padding: Tensor1D[Long],
-  dilation: Tensor1D[Long],
-  groups: Long,
-  input_shape: Tensor1D[Long]
-) extends NIRParams {
   override def nirType: String = "Conv2d"
   override def toString: String = {
-    s"$nirType {\n\tweights = $weights,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
+    val weightString =  s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+    s"$nirType {\n\tweights = $weightString,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 
@@ -103,9 +94,9 @@ final case class FlattenParams(
 }
 
 final case class SumPool2DParams(
-  kernel_size: Tensor1D[Long],
-  padding: Tensor1D[Long],
-  stride: Tensor1D[Long]
+  kernel_size: Tensor[Long],
+  padding: Tensor[Long],
+  stride: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "SumPool2d"
   override def toString: String = {
@@ -160,7 +151,7 @@ final case class CubaLIFParams(
 }
 
 final case class LinearParams(
-  weight: Tensor1D[Float],
+  weight: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "Linear"
   override def toString: String = {
@@ -179,7 +170,7 @@ final case class AffineParams(
 }
 
 final case class InputParams(
-  shape: Tensor1D[Long],
+  shape: Tensor[Long],
 ) extends NIRParams {
   override def nirType: String = "Input"
   override def toString: String = {
@@ -188,7 +179,7 @@ final case class InputParams(
 }
 
 final case class OutputParams(
-  shape: Tensor1D[Long],
+  shape: Tensor[Long],
 ) extends NIRParams {
   override def nirType: String = "Output"
   override def toString: String = {
