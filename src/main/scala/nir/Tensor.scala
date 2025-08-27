@@ -95,11 +95,12 @@ case class Indexer(shape: List[Int]) {
 
 class Tensor[D](data: Array[D], idx: Indexer) {
   val shape = idx.shape
+  val size = idx.size
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): Tensor[D] = new Tensor[D](data, idx.reshape(newshape))
   def map[B: ClassTag](f: D => B): Tensor[B] = new Tensor[B](data.map(f), idx)
 
-  private def toNestedList(tree: RangeTree): Any = tree match {
+  private def toNestedList(tree: RangeTree): List[_] = tree match {
     case Leaf(b, e) =>
       data.slice(b, e).toList
 
@@ -107,7 +108,7 @@ class Tensor[D](data: Array[D], idx: Indexer) {
       children.map(toNestedList)
   }
 
-  def toList: Any = toNestedList(idx.rangeTree)
+  def toList: List[_] = toNestedList(idx.rangeTree)
 }
 
 object Tensor {
