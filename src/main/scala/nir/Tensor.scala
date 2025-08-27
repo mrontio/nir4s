@@ -119,23 +119,19 @@ object Tensor {
 
   }
 
-  private def flattenArray[T: ClassTag](a: Array[Object], dims: List[Int]): Array[T] = {
-    dims match {
-      case Nil                  => Array.empty[T]
-      case dim :: Nil         => a.asInstanceOf[Array[T]]
-      case dim1 :: dim2:: Nil => a.asInstanceOf[Array[Array[T]]].flatten.asInstanceOf[Array[T]]
-      case dim :: t           => a.asInstanceOf[Array[Array[Object]]].map(flattenArray(_, t)).flatten.asInstanceOf[Array[T]]
-    }
+  private def flattenArrayRecursive(x: Any): Array[Any] = x match {
+    case a: Array[_] => a.flatMap(flattenArrayRecursive)
+    case v           => Array(v)
   }
 
   private def flattenDatasetArray[T: ClassTag](d: Dataset): Array[T] = {
-    val ndArray = d.getData.asInstanceOf[Array[Object]]
-    val dims = d.getDimensions.toList
-
-    flattenArray[T](ndArray, dims)
+    val rawData = d.getData // e.g. Array[Float], Array[Array[Float]], etc.
+    val flat: Array[Any] = flattenArrayRecursive(rawData)
+    flat.map(_.asInstanceOf[T]) // safe because caller controls T
   }
 
-  def apply(d: Dataset) = {
+
+  def apply(d: Dataset): Tensor[_] = {
     val idx = Indexer(d.getDimensions.toList)
     d.getDataType.getJavaType.toString match {
       case "float" => new Tensor(flattenDatasetArray[Float](d), idx)

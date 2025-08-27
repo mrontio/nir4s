@@ -37,7 +37,8 @@ class NIRSpec extends FunSuite {
     file = new File(files(0))
   } {
     test(s"NIR file: samples/$group/network.nir") {
-      val g: NIRGraph = NIRMapper.loadGraph(file)
+      val g = NIRGraph(file)
+      print(g)
     }
   }
 }

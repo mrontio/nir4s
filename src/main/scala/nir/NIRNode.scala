@@ -23,15 +23,6 @@ sealed trait NIRParams {
   def toString: String
 }
 
-sealed trait ConvWeights[W] {
-  def get: W
-  def outChannels: List[Int]
-  def inChannels: List[Int]
-  def kernelSize: List[Int]
-  def toString: String
-}
-
-
 final case class Conv1DParams(
   weight: Tensor[Float],
   bias: Tensor[Float],

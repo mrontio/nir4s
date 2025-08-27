@@ -1,5 +1,7 @@
 package nir
 
+import java.io.File
+
 case class NIRGraph(nodes: Set[NIRNode]) {
   val input: NIRNode = nodes.find(_.previous.size == 0).get
   val output: NIRNode = nodes.find(_.params.nirType == "Output")
@@ -31,7 +33,11 @@ object NIRGraph {
     val top: NIRNode = NIRNode(topRaw.id, Set.empty[NIRNode], topRaw.params)
     // TODO: put initial case into recursive function
     val nodes = Set(top) ++ convertRawNodes(rawNodes, top)
-    NIRGraph(nodes)
+    new NIRGraph(nodes)
+  }
+
+  def apply(f: File): NIRGraph = {
+    NIRFileMapper.loadGraph(f)
   }
 
   private def convertRawNodes(nodes: Set[RawNode], top: NIRNode): Set[NIRNode] = {
