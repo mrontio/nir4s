@@ -21,9 +21,15 @@ object Main extends App {
     }
   }
 
-  // val f = Fensor(d)
-  val f = Tensor(Array(1, 2, 3, 4, 5, 6), List(2, 3))
+  val t = Tensor(Array(1, 2, 3, 4, 5, 6), List(1, 1, 1, 1, 6))
 
-  println(f.toList)
+  t match {
+    case Tensor.Rank(1) => println("1")
+    case Tensor.Rank(2) => println("2")
+    case Tensor.Rank(n) => println(n)
+  }
+
+
+  println(t.toList)
 
 }

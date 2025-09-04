@@ -95,6 +95,7 @@ case class Indexer(shape: List[Int]) {
 
 class Tensor[D](data: Array[D], idx: Indexer) {
   val shape = idx.shape
+  val rank = idx.rank
   val size = idx.size
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): Tensor[D] = new Tensor[D](data, idx.reshape(newshape))
@@ -117,6 +118,11 @@ object Tensor {
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
     new Tensor[D](a, i)
 
+  }
+
+  // Allow to match based on rank
+  object Rank {
+    def unapply[D](tensor: Tensor[D]): Option[Int] = Some(tensor.rank)
   }
 
   private def flattenArrayRecursive(x: Any): Array[Any] = x match {
