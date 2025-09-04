@@ -93,7 +93,7 @@ case class Indexer(shape: List[Int]) {
 }
 
 
-class Tensor[D](data: Array[D], idx: Indexer) {
+class Tensor[D](val data: Array[D], val idx: Indexer) {
   val shape = idx.shape
   val rank = idx.rank
   val size = idx.size
@@ -101,7 +101,7 @@ class Tensor[D](data: Array[D], idx: Indexer) {
   def reshape(newshape: List[Int]): Tensor[D] = new Tensor[D](data, idx.reshape(newshape))
   def map[B: ClassTag](f: D => B): Tensor[B] = new Tensor[B](data.map(f), idx)
 
-  private def toNestedList(tree: RangeTree): List[_] = tree match {
+  protected def toNestedList(tree: RangeTree): List[_] = tree match {
     case Leaf(b, e) =>
       data.slice(b, e).toList
 
@@ -147,4 +147,106 @@ object Tensor {
     }
 
   }
+}
+
+/*
+ PATTERN MATCHING
+ ----------------
+
+ We define the following classes to pattern match against to.
+ Whilst you could match on Rank, you have to use asInstanceOf with the toList
+ operator, which can be avoided be designing these 'special' ranks.
+ Any shape of Tensor is still supported, these are simply safer.
+ */
+
+class Tensor1D[D](override val data: Array[D], override val idx: Indexer)
+  extends Tensor[D](data, idx) {
+
+  require(idx.rank == 1, s"Expected rank 1 tensor, got ${idx.rank}")
+
+  override def toList: List[D] =
+    toNestedList(idx.rangeTree).asInstanceOf[List[D]]
+}
+
+object Tensor1D {
+  def apply[D](data: Array[D], idx: Indexer): Tensor1D[D] =
+    new Tensor1D(data, idx)
+
+  def unapply[D](t: Tensor[D]): Option[Tensor1D[D]] =
+    if (t.idx.rank == 1) Some(apply(t.data, t.idx)) else None
+}
+
+
+class Tensor2D[D](override val data: Array[D], override val idx: Indexer)
+  extends Tensor[D](data, idx) {
+
+  require(idx.rank == 2, s"Expected rank 2 tensor, got ${idx.rank}")
+
+  override def toList: List[List[D]] =
+    toNestedList(idx.rangeTree).asInstanceOf[List[List[D]]]
+}
+
+
+object Tensor2D {
+  def apply[D](data: Array[D], idx: Indexer): Tensor2D[D] =
+    new Tensor2D(data, idx)
+
+  def unapply[D](t: Tensor[D]): Option[Tensor2D[D]] =
+    if (t.idx.rank == 2) Some(apply(t.data, t.idx)) else None
+}
+
+
+// Tensor3D.scala
+class Tensor3D[D](override val data: Array[D], override val idx: Indexer)
+  extends Tensor[D](data, idx) {
+
+  require(idx.rank == 3, s"Expected rank 3 tensor, got ${idx.rank}")
+
+  override def toList: List[List[List[D]]] =
+    toNestedList(idx.rangeTree).asInstanceOf[List[List[List[D]]]]
+}
+
+object Tensor3D {
+  def apply[D](data: Array[D], idx: Indexer): Tensor3D[D] =
+    new Tensor3D(data, idx)
+
+  def unapply[D](t: Tensor[D]): Option[Tensor3D[D]] =
+    if (t.idx.rank == 3) Some(apply(t.data, t.idx)) else None
+}
+
+// Tensor4D.scala
+class Tensor4D[D](override val data: Array[D], override val idx: Indexer)
+  extends Tensor[D](data, idx) {
+
+  require(idx.rank == 4, s"Expected rank 4 tensor, got ${idx.rank}")
+
+  override def toList: List[List[List[List[D]]]] =
+    toNestedList(idx.rangeTree).asInstanceOf[List[List[List[List[D]]]]]
+}
+
+object Tensor4D {
+  def apply[D](data: Array[D], idx: Indexer): Tensor4D[D] =
+    new Tensor4D(data, idx)
+
+  def unapply[D](t: Tensor[D]): Option[Tensor4D[D]] =
+    if (t.idx.rank == 4) Some(apply(t.data, t.idx)) else None
+}
+
+
+// Tensor5D.scala
+class Tensor5D[D](override val data: Array[D], override val idx: Indexer)
+  extends Tensor[D](data, idx) {
+
+  require(idx.rank == 5, s"Expected rank 5 tensor, got ${idx.rank}")
+
+  override def toList: List[List[List[List[List[D]]]]] =
+    toNestedList(idx.rangeTree).asInstanceOf[List[List[List[List[List[D]]]]]]
+}
+
+object Tensor5D {
+  def apply[D](data: Array[D], idx: Indexer): Tensor5D[D] =
+    new Tensor5D(data, idx)
+
+  def unapply[D](t: Tensor[D]): Option[Tensor5D[D]] =
+    if (t.idx.rank == 5) Some(apply(t.data, t.idx)) else None
 }
