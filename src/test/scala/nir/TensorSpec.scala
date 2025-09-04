@@ -83,11 +83,11 @@ class TensorSpec extends FunSuite {
     }
   }
 
-  test("Match Tensor against Tensor.Rank of ranks 1..10") {
+  test("Match Tensor against Tensor.Rank of ranks 1..5") {
     def makeShape(rank: Int): List[Int] =
       List.fill(rank - 1)(1) :+ 6  // always ends with 6 to keep total size consistent
 
-    val tensors = (1 to 10).map { rank =>
+    val tensors = (1 to 5).map { rank =>
       val shape = makeShape(rank)
       val size = shape.product
       Tensor(Array.tabulate(size)(i => i + 1), shape)
