@@ -52,7 +52,56 @@ class TensorSpec extends FunSuite {
     val eqCond = (f: Float, i: Int) => f == i || f == i - 1 || f == i + 1
     for (i <- 0 until knownShape.product) assert(eqCond(tIntReshape(i), i), s"At Tensor index $i expected $i +-1 but got ${tIntReshape(i)}")
     for (i <- 0 until knownShape.product) assert(eqCond(tIntList(i), i), s"At List index $i expected $i +-1 but got ${tIntReshape(i)}")
+  }
 
+  test("Match Tensor against subclasses Tensor1D...Tensor5D") {
+    val tensorList = List(
+      Tensor(Array(1, 2, 3, 4, 5, 6), List(6)),                // rank 1
+      Tensor(Array(1, 2, 3, 4, 5, 6), List(1, 6)),              // rank 2
+      Tensor(Array(1, 2, 3, 4, 5, 6), List(1, 1, 6)),           // rank 3
+      Tensor(Array(1, 2, 3, 4, 5, 6), List(1, 1, 1, 6)),        // rank 4
+      Tensor(Array(1, 2, 3, 4, 5, 6), List(1, 1, 1, 1, 6))      // rank 5
+    )
 
+    // A list of extractors and their string names
+    val tensorExtractors: List[(String, Tensor[_] => Option[_])] = List(
+      "Tensor1D" -> (Tensor1D.unapply(_)),
+      "Tensor2D" -> (Tensor2D.unapply(_)),
+      "Tensor3D" -> (Tensor3D.unapply(_)),
+      "Tensor4D" -> (Tensor4D.unapply(_)),
+      "Tensor5D" -> (Tensor5D.unapply(_))
+    )
+
+    val results = tensorList.zipWithIndex.map { case (tensor, i) =>
+      val expected = s"Tensor${i + 1}D"
+
+      val matched = tensorExtractors.collectFirst {
+        case (name, extractor) if extractor(tensor).isDefined => name
+      }
+
+      assert(matched.contains(expected), s"Expected $expected but got $matched")
+    }
+  }
+
+  test("Match Tensor against Tensor.Rank of ranks 1..10") {
+    def makeShape(rank: Int): List[Int] =
+      List.fill(rank - 1)(1) :+ 6  // always ends with 6 to keep total size consistent
+
+    val tensors = (1 to 10).map { rank =>
+      val shape = makeShape(rank)
+      val size = shape.product
+      Tensor(Array.tabulate(size)(i => i + 1), shape)
+    }
+
+    tensors.zipWithIndex.foreach { case (tensor, idx) =>
+      val expectedRank = idx + 1
+
+      val matchedRank = tensor match {
+        case Tensor.Rank(r) => r
+        case _       => -1 // should never hit this
+      }
+
+      assert(matchedRank == expectedRank, s"Expected rank $expectedRank, got $matchedRank")
+    }
   }
 }
