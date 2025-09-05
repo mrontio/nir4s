@@ -40,4 +40,15 @@ object RangeTree {
       }
     build(shape).runA(0).value
   }
+
+  def depth(tree: RangeTree): Int = tree match {
+    case Leaf(_, _) => 1
+    case Branch(children) =>
+      1 + (if (children.isEmpty) 0 else children.map(depth).max)
+  }
+
+  def shape(tree: RangeTree): List[Int] = tree match{
+    case Leaf(begin, end) => List(end - begin)
+    case Branch(children) => List(children.length) ++ shape(children(0))
+  }
 }

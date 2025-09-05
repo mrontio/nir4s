@@ -64,7 +64,7 @@ case class Indexer(shape: List[Int]) {
   }
 }
 
-class TensorDynamic[D](data: Array[D], idx: Indexer) {
+class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   val shape = idx.shape
   val rank = idx.rank
   val size = idx.size
@@ -84,13 +84,14 @@ class TensorDynamic[D](data: Array[D], idx: Indexer) {
 
   def toStatic: TensorStatic[D] = {
     rank match {
-      case 1 => Tensor1D(data, List(shape(0)))
+      case 1 => new Tensor1D(data, List(shape(0)))
+      case 2 => Tensor2D.fromRangeTree[D](data, idx.rangeTree)
     }
   }
 }
 
 object TensorDynamic {
-  def apply[D](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
+  def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
     val i = Indexer(shape)
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
     new TensorDynamic[D](a, i)

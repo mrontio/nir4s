@@ -37,3 +37,34 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
   def apply(i0: Int): T = data(i0)
 
 }
+
+
+case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends TensorStatic[T] {
+  override def rank: Int = 2
+  override def size: Int = data.map(_.size).sum
+
+  def map[B: ClassTag](f: T => B): Tensor2D[B] =
+    Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]), shape)
+  override def toString: String = "Tensor2D(" + data.mkString(", ") + ")"
+  override def toList: List[List[T]] =
+    data.collect { case t1: Tensor1D[T] => t1.toList }.toList
+  def apply(i0: Int, i1: Int): T = data(i0)(i1)
+}
+
+object Tensor2D {
+  def fromRangeTree[T: ClassTag](a: Array[T], rg: RangeTree): Tensor2D[T] = {
+    require(RangeTree.depth(rg) == 2, s"Cannot contstruct Tensor2D from tree $rg")
+    val shape = RangeTree.shape(rg)
+
+    val data: Array[Tensor1D[T]] =
+      rg match {
+        case Branch(children) => children.collect{
+          case Leaf(begin, end) => Tensor1D(a.slice(begin, end), List(begin - end))
+          case b: Branch => throw new Exception("Malformed RangeTree for 2D tensor")
+        }.toArray
+        case l: Leaf => throw new Exception("Malformed RangeTree for 2D tensor")
+      }
+
+    new Tensor2D(data, shape)
+  }
+}
