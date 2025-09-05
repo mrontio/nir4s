@@ -2,9 +2,6 @@ package nir.tensor
 
 import io.jhdf.api.Dataset
 import scala.reflect.ClassTag
-import cats.data.State
-import cats.syntax.traverse._
-import cats.instances.list._
 
 
 /* Dynamic Tensor
@@ -13,43 +10,12 @@ import cats.instances.list._
  * Disadvantages: Slower runtime due to checks, often requires asInstanceOf
  */
 
-// Tree of indices for flat array.
-sealed trait RangeTree
-case class Leaf(begin: Int, end: Int) extends RangeTree
-case class Branch(children: List[RangeTree]) extends RangeTree
 
 // Indexer class to index 1D array in Tensor
 case class Indexer(shape: List[Int]) {
   def rank: Int = shape.length
   def size: Int = shape.reduce(_ * _)
-  def rangeTree: RangeTree = buildTree(shape)
-
-  // Counter monad
-  private type Counter[A] = State[Int, A]
-  private val next: Counter[Int] = State { s => (s + 1, s) }
-  private def plus(x: Int): Counter[(Int, Int)] =
-    State(s => {
-      val b = s
-      val e = s + x
-      (e, (b, e))
-    })
-
-  // Build the range tree
-  def buildTree(shape: List[Int]): RangeTree = {
-    def build(dims: List[Int]): Counter[RangeTree] =
-      dims match {
-        case Nil =>
-          // Leaf dimension size 1
-          for { idx <- next } yield Leaf(idx, idx + 1)
-        case dim :: Nil =>
-          // Leaf dimension size n > 1
-          for { be <- plus(dim) } yield Leaf(be._1, be._2)
-        case h :: t =>
-          for { children <- List.fill(h)(build(t)).sequence } yield Branch(children)
-      }
-    build(shape).runA(0).value
-  }
-
+  def rangeTree: RangeTree = RangeTree.buildTree(shape)
 
   private def idx(dims: List[Int]): Int = {
     // Row-major order (like numpy), (0, 0, 1) -> 1
@@ -115,6 +81,12 @@ class TensorDynamic[D](data: Array[D], idx: Indexer) {
   }
 
   def toList: List[_] = toNestedList(idx.rangeTree)
+
+  def toStatic: TensorStatic[D] = {
+    rank match {
+      case 1 => Tensor1D(data, List(shape(0)))
+    }
+  }
 }
 
 object TensorDynamic {
