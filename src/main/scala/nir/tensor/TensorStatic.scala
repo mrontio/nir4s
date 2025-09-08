@@ -12,16 +12,25 @@ import shapeless.HList
  */
 
 sealed trait TensorStatic[T] {
-  def shape: List[Int]
+  val shape: List[Int]
   def rank: Int
   def size: Int
 
   def toString: String
 
+  /* TODO:
+   * apply: User-facing, needs type-checking.
+   * at: internal, just access.
+   */
+  protected def at(idx: Seq[Int]): T
+  def apply(idx: Int*): T
+
   def map[B: ClassTag](f: T => B): TensorStatic[B]
 
   // Ambiguous type will be over-written by children
   def toList: List[_]
+
+ class ShapeException(message: String) extends IllegalArgumentException(message)
 }
 
 case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T] {
@@ -34,8 +43,9 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
   override def map[B: ClassTag](f: T => B): TensorStatic[B] =  Tensor1D[B](data.map(f), shape)
   override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
   override def toList: List[T] = data.toList
-  def apply(i0: Int): T = data(i0)
 
+  override def apply(idx: Int*): T = data(idx.head)
+  override def at(idx: Seq[Int]): T = data(idx.head)
 }
 
 object Tensor1D {
@@ -62,7 +72,9 @@ case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends Tenso
   override def toString: String = "Tensor2D(" + data.mkString(", ") + ")"
   override def toList: List[List[T]] =
     data.collect { case t1: Tensor1D[T] => t1.toList }.toList
-  def apply(i0: Int, i1: Int): T = data(i0)(i1)
+
+  override def apply(idx: Int*): T = data(idx.head).at(idx.tail)
+  override def at(idx: Seq[Int]): T = data(idx.head).at(idx.tail)
 }
 
 object Tensor2D {
@@ -93,7 +105,9 @@ case class Tensor3D[T](data: Array[Tensor2D[T]], shape: List[Int]) extends Tenso
     Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]), shape)
   override def toString: String = "Tensor3D(" + data.mkString(", ") + ")"
   override def toList: List[List[List[T]]] = data.collect { _.toList }.toList
-  def apply(i0: Int, i1: Int, i2: Int): T = data(i0)(i1, i2)
+
+  override def apply(idx: Int*): T = data(idx.head).at(idx.tail)
+  override def at(idx: Seq[Int]): T = data(idx.head).at(idx.tail)
 
 }
 

@@ -71,7 +71,7 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   val size = idx.size
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): TensorDynamic[D] = new TensorDynamic[D](data, idx.reshape(newshape))
-  def squeeze: TensorDynamic[D] = new TensorDynamic(data, idx.squeeze)
+  def squeeze: TensorDynamic[D] = new TensorDynamic(data, idx.squeeze())
   def map[B: ClassTag](f: D => B): TensorDynamic[B] = new TensorDynamic[B](data.map(f), idx)
 
   private def toNestedList(tree: RangeTree): List[Any] = tree match {

@@ -36,9 +36,24 @@ class TensorStaticSpec extends FunSuite {
       val ts = td.toStatic // should yield the correct rank-specific subtype
       assert(td.toList == ts.toList, "Failed Dynamic <-> Static equality check.")
     }
-
-
   }
+
+  test("Access all elements of TensorStatic") {
+    val td = TensorDynamic(Array(1, 2, 3, 4, 5, 6, 7, 8), List(2, 2, 2))
+    val ts = td.toStatic
+    val shape = ts.shape
+
+    var counter = 1
+    for {
+      i <- 0 until shape(0)
+      j <- 0 until shape(1)
+      k <- 0 until shape(2)
+    } {
+      assert(ts(i, j, k) == counter)
+      counter += 1
+    }
+  }
+
 
   test("Read NIR weight into TensorStatic") {
     val knownShape = List(16, 16, 3)
