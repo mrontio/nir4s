@@ -53,7 +53,7 @@ class TensorDynamicSpec extends FunSuite {
       assert(t(lastIdx: _*) == data.last, s"Failed at shape $shape: last element mismatch")
 
       // Reshape to 1D and verify all elements match
-      val flat = t.reshape(List(data.length))
+      val flat = t.reshape(data.length)
       for (i <- data.indices) {
         assert(flat(i) == data(i), s"Reshape failed at index $i for shape $shape")
       }
@@ -65,7 +65,7 @@ class TensorDynamicSpec extends FunSuite {
     val t = TensorDynamic[Float](d)
     val tInt = t.map(_.round.toInt)
     // Reshape to 1D
-    val tIntReshape = tInt.reshape(List(knownShape.product))
+    val tIntReshape = tInt.reshape(knownShape.product)
     val tIntList = tIntReshape.toList.asInstanceOf[List[Int]]
 
     assert(t.shape == knownShape)

@@ -71,7 +71,7 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   val rank = idx.rank
   val size = idx.size
   def apply(indices: Int*) = data(idx(indices))
-  def reshape(newshape: List[Int]): TensorDynamic[D] = new TensorDynamic[D](data, idx.reshape(newshape))
+  def reshape(newshape: Int*): TensorDynamic[D] = new TensorDynamic[D](data, idx.reshape(newshape.toList))
   def squeeze: TensorDynamic[D] = new TensorDynamic(data, idx.squeeze())
   def map[B: ClassTag](f: D => B): TensorDynamic[B] = new TensorDynamic[B](data.map(f), idx)
 
