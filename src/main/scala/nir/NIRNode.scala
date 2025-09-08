@@ -1,6 +1,8 @@
 // src/main/scala/nir/NIRNode.scala
 package nir
 
+import tensor._
+
 case class RawNode(
   id:      String,
   prevIds: Set[String],
@@ -24,11 +26,11 @@ sealed trait NIRParams {
 }
 
 final case class Conv1DParams(
-  weight: Tensor[Float],
-  bias: Tensor[Float],
-  stride: Tensor[Long],
-  padding: Tensor[Long],
-  dilation: Tensor[Long],
+  weight: TensorStatic[Float],
+  bias: TensorStatic[Float],
+  stride: TensorStatic[Long],
+  padding: TensorStatic[Long],
+  dilation: TensorStatic[Long],
   groups: Long,
   input_shape: Long,
 ) extends NIRParams {
@@ -49,13 +51,13 @@ final case class Conv1DParams(
 }
 
 final case class Conv2DParams(
-  weight: Tensor[Float],
-  bias: Tensor[Float],
-  stride: Tensor[Long],
-  padding: Tensor[Long],
-  dilation: Tensor[Long],
+  weight: TensorStatic[Float],
+  bias: TensorStatic[Float],
+  stride: TensorStatic[Long],
+  padding: TensorStatic[Long],
+  dilation: TensorStatic[Long],
   groups: Long,
-  input_shape: Tensor[Long]
+  input_shape: TensorStatic[Long]
 ) extends NIRParams {
     def outChannels: List[Int] =
     List(weight.shape(0))
@@ -76,7 +78,7 @@ final case class Conv2DParams(
 final case class FlattenParams(
   start_dim: Long,
   end_dim: Long,
-  input_type: Tensor[Long]
+  input_type: TensorStatic[Long]
 ) extends NIRParams {
   override def nirType: String = "Flatten"
   override def toString: String = {
@@ -85,9 +87,9 @@ final case class FlattenParams(
 }
 
 final case class SumPool2DParams(
-  kernel_size: Tensor[Long],
-  padding: Tensor[Long],
-  stride: Tensor[Long]
+  kernel_size: TensorStatic[Long],
+  padding: TensorStatic[Long],
+  stride: TensorStatic[Long]
 ) extends NIRParams {
   override def nirType: String = "SumPool2d"
   override def toString: String = {
@@ -97,9 +99,9 @@ final case class SumPool2DParams(
 
 
 final case class LIParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
+  tau: TensorStatic[Float],
+  r: TensorStatic[Float],
+  v_leak: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "LI"
   override def toString: String = {
@@ -108,9 +110,9 @@ final case class LIParams(
 }
 
 final case class IFParams(
-  r: Tensor[Float],
-  v_reset: Tensor[Float],
-  v_threshold: Tensor[Float],
+  r: TensorStatic[Float],
+  v_reset: TensorStatic[Float],
+  v_threshold: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "IF"
   override def toString: String = {
@@ -119,10 +121,10 @@ final case class IFParams(
 }
 
 final case class LIFParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
-  v_threshold: Tensor[Float],
+  tau: TensorStatic[Float],
+  r: TensorStatic[Float],
+  v_leak: TensorStatic[Float],
+  v_threshold: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "LIF"
   override def toString: String = {
@@ -131,9 +133,9 @@ final case class LIFParams(
 }
 
 final case class CubaLIFParams(
-  tau: Tensor[Float],
-  tauSynExc: Tensor[Float],
-  tauSynInh: Tensor[Float],
+  tau: TensorStatic[Float],
+  tauSynExc: TensorStatic[Float],
+  tauSynInh: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "CubaLIF"
   override def toString: String = {
@@ -142,7 +144,7 @@ final case class CubaLIFParams(
 }
 
 final case class LinearParams(
-  weight: Tensor[Float],
+  weight: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "Linear"
   override def toString: String = {
@@ -151,8 +153,8 @@ final case class LinearParams(
 }
 
 final case class AffineParams(
-  bias: Tensor[Float],
-  weight: Tensor[Float],
+  bias: TensorStatic[Float],
+  weight: TensorStatic[Float],
 ) extends NIRParams {
   override def nirType: String = "Affine"
   override def toString: String = {
@@ -161,7 +163,7 @@ final case class AffineParams(
 }
 
 final case class InputParams(
-  shape: Tensor[Long],
+  shape: TensorStatic[Long],
 ) extends NIRParams {
   override def nirType: String = "Input"
   override def toString: String = {
@@ -170,7 +172,7 @@ final case class InputParams(
 }
 
 final case class OutputParams(
-  shape: Tensor[Long],
+  shape: TensorStatic[Long],
 ) extends NIRParams {
   override def nirType: String = "Output"
   override def toString: String = {
