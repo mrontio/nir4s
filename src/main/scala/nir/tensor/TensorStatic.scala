@@ -40,7 +40,7 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
   override def rank: Int = 1
   override def size: Int = data.length
 
-  override def map[B: ClassTag](f: T => B): TensorStatic[B] =  Tensor1D[B](data.map(f), shape)
+  def map[B: ClassTag](f: T => B): TensorStatic[B] =  Tensor1D[B](data.map(f), shape)
   override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
   override def toList: List[T] = data.toList
 
