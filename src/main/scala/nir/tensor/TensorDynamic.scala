@@ -13,6 +13,7 @@ import scala.reflect.ClassTag
 
 // Indexer class to index 1D array in Tensor
 case class Indexer(shape: List[Int]) {
+
   def rank: Int = shape.length
   def size: Int = shape.reduce(_ * _)
   def rangeTree: RangeTree = RangeTree.buildTree(shape)
@@ -45,7 +46,7 @@ case class Indexer(shape: List[Int]) {
   private def squeeze(shape: List[Int]): List[Int] =
     shape match {
       case Nil => Nil
-      case 1 :: Nil => Nil
+      // case 1 :: Nil => Nil -- we assume we don't want to squeeze from the right
       case h :: Nil => h :: Nil
       case 1 :: t => squeeze(t)
       case h :: t => h :: squeeze(t)
@@ -70,6 +71,7 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   val size = idx.size
   def apply(indices: Int*) = data(idx(indices))
   def reshape(newshape: List[Int]): TensorDynamic[D] = new TensorDynamic[D](data, idx.reshape(newshape))
+  def squeeze: TensorDynamic[D] = new TensorDynamic(data, idx.squeeze)
   def map[B: ClassTag](f: D => B): TensorDynamic[B] = new TensorDynamic[B](data.map(f), idx)
 
   private def toNestedList(tree: RangeTree): List[Any] = tree match {
@@ -81,7 +83,6 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   }
 
   def toList: List[_] = toNestedList(idx.rangeTree)
-
 
   // Map of Dynamic.Rank -> Static constructors
   private val staticConstructors: Map[Int, (Array[D], RangeTree) => TensorStatic[D]] = Map(
@@ -99,11 +100,6 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
 }
 
 object TensorDynamic {
-  def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
-    val i = Indexer(shape)
-    if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
-    new TensorDynamic[D](a, i)
-  }
 
   // Allow to match based on rank
   object Rank {
@@ -121,15 +117,21 @@ object TensorDynamic {
     flat.map(_.asInstanceOf[T]) // safe because caller controls T
   }
 
+  def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
+    val i = Indexer(shape)
+    if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
+    new TensorDynamic[D](a, i)
+  }
 
-  def apply(d: Dataset): TensorDynamic[_] = {
+  def apply[D: ClassTag](d: Dataset): TensorDynamic[D] = {
+    val expectedType = implicitly[ClassTag[D]].runtimeClass
+    val actualType = d.getDataType.getJavaType
     val idx = Indexer(d.getDimensions.toList)
-    d.getDataType.getJavaType.toString match {
-      case "float" => new TensorDynamic(flattenDatasetArray[Float](d), idx)
-      case "int"   => new TensorDynamic(flattenDatasetArray[Int](d), idx)
-      case "long"  => new TensorDynamic(flattenDatasetArray[Long](d), idx)
-      case o => throw new java.text.ParseException(s"Java type \"${o}\" not yet supported for TensorDynamic conversion", 0)
-    }
 
+    // Run-time checks
+    require(expectedType != classOf[Nothing], s"TensorDynamic(Dataset) contructor requires type parameter [D].")
+    require(actualType == expectedType, s"For dataset <${d.getName}>, expected type $expectedType but got $actualType.")
+
+    new TensorDynamic(flattenDatasetArray[D](d), idx)
   }
 }

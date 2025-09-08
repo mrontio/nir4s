@@ -20,28 +20,49 @@ class TensorDynamicSpec extends FunSuite {
     }
   }
 
-  test("TensorDynamic from Array") {
-    val a =
-      Array(3.14, 2.718, 6.626,
-        1.618, 0.577, 4.669,
-        2.502, 1.414, 1.732)
+  test("TensorDynamic handles shapes from 1D to 8D") {
+    val data = Array(
+      3.14, 2.718, 6.626,
+      1.618, 0.577, 4.669,
+      2.502, 1.414, 1.732
+    ) // 9 elements
 
-    val shape = List(1, 3, 3)
-    val t = TensorDynamic(a, shape)
-    val tr = t.reshape(List(9))
+    val baseValue = data(0)
+    val shapes = List(
+      List(9),                  // 1D
+      List(3, 3),               // 2D
+      List(1, 3, 3),            // 3D
+      List(1, 1, 3, 3),         // 4D
+      List(1, 1, 1, 3, 3),      // 5D
+      List(1, 1, 1, 1, 3, 3),   // 6D
+      List(1, 1, 1, 1, 1, 3, 3),// 7D
+      List(1, 1, 1, 1, 1, 1, 3, 3) // 8D
+    )
 
-    assert(t.shape == List(1, 3, 3))
-    assert(t(0, 0, 0) == 3.14)
-    assert(t(0, 2, 2) == 1.732)
+    for (shape <- shapes) {
+      val t = TensorDynamic(data, shape)
 
-    // Reshape test
-    for (i <- 0 to 9) assert(tr(0) == a(0))
+      // Confirm shape
+      assert(t.shape == shape)
 
+      // Confirm first and last elements are correct
+      val firstIdx = List.fill(shape.size)(0)
+      val lastIdx = shape.indices.map(i => shape(i) - 1).toList
+
+      assert(t(firstIdx: _*) == data(0), s"Failed at shape $shape: first element mismatch")
+      assert(t(lastIdx: _*) == data.last, s"Failed at shape $shape: last element mismatch")
+
+      // Reshape to 1D and verify all elements match
+      val flat = t.reshape(List(data.length))
+      for (i <- data.indices) {
+        assert(flat(i) == data(i), s"Reshape failed at index $i for shape $shape")
+      }
+    }
   }
 
   test("Create TensorDynamic from HDF Dataset") {
     val knownShape = List(16, 16, 3)
-    val t = TensorDynamic(d).asInstanceOf[TensorDynamic[Float]]
+    val t = TensorDynamic[Float](d)
     val tInt = t.map(_.round.toInt)
     // Reshape to 1D
     val tIntReshape = tInt.reshape(List(knownShape.product))

@@ -7,7 +7,7 @@ import io.jhdf.HdfFile
 import io.jhdf.api.{Attribute, Dataset, Group, Node}
 import scala.jdk.CollectionConverters._
 
-import tensor.{TensorDynamic}
+import tensor._
 
 class TensorStaticSpec extends FunSuite {
   val conv1Path = "src/test/scala/nir/samples/conv1/network.nir"
@@ -42,7 +42,7 @@ class TensorStaticSpec extends FunSuite {
 
   test("Read NIR weight into TensorStatic") {
     val knownShape = List(16, 16, 3)
-    val td = TensorDynamic(d).asInstanceOf[TensorDynamic[Float]]
+    val td = TensorDynamic[Float](d)
     val ts = td.toStatic
 
     assert(td.toList == ts.toList, "Failed Dynamic <-> Static equality check.")
