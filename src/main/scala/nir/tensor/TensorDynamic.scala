@@ -119,7 +119,7 @@ object TensorDynamic {
   }
 
   // 1D case
-  def apply[D: ClassTag](a: Seq[D]): TensorDynamic[D] = {
+  def apply[D: ClassTag](a: D*): TensorDynamic[D] = {
     val i = Indexer(List(a.length))
     new TensorDynamic[D](a.toArray, i)
   }

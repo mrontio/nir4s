@@ -99,13 +99,7 @@ class TensorDynamicSpec extends FunSuite {
   }
 
   test("Implicit static conversion") {
-    val data = Array(
-      3.14, 2.718, 6.626,
-      1.618, 0.577, 4.669,
-      2.502, 1.414, 1.732
-    ) // 9 elements
-
-    val td = TensorDynamic(data)
+    val td = TensorDynamic(3.14, 2.718, 6.626, 1.618, 0.577, 4.669, 2.502, 1.414, 1.732)
     val ts: TensorStatic[Double] = td
   }
 }
