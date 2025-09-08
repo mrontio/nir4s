@@ -82,10 +82,18 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
 
   def toList: List[_] = toNestedList(idx.rangeTree)
 
+
+  // Map of Dynamic.Rank -> Static constructors
+  private val staticConstructors: Map[Int, (Array[D], RangeTree) => TensorStatic[D]] = Map(
+    1 -> Tensor1D.fromRangeTree[D],
+    2 -> Tensor2D.fromRangeTree[D],
+    3 -> Tensor3D.fromRangeTree[D]
+  )
+
   def toStatic: TensorStatic[D] = {
-    rank match {
-      case 1 => new Tensor1D(data, List(shape(0)))
-      case 2 => Tensor2D.fromRangeTree[D](data, idx.rangeTree)
+    staticConstructors.get(rank) match {
+      case Some(constructor) => constructor(data, idx.rangeTree)
+      case None => throw new Exception(s"Static tensors of dimension $rank are not yet supported.")
     }
   }
 }

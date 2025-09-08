@@ -38,6 +38,20 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
 
 }
 
+object Tensor1D {
+  def fromRangeTree[T: ClassTag](a: Array[T], rg: RangeTree): Tensor1D[T] = {
+    require(RangeTree.depth(rg) == 1, s"Cannot contstruct Tensor1D from tree $rg")
+    val shape = RangeTree.shape(rg)
+
+    val data: Array[T] =
+      rg match {
+        case Leaf(begin, end) => a.slice(begin, end)
+        case b: Branch => throw new Exception("Malformed RangeTree for 1D tensor")
+      }
+
+    new Tensor1D(data, shape)
+  }
+}
 
 case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends TensorStatic[T] {
   override def rank: Int = 2
@@ -59,12 +73,44 @@ object Tensor2D {
     val data: Array[Tensor1D[T]] =
       rg match {
         case Branch(children) => children.collect{
-          case Leaf(begin, end) => Tensor1D(a.slice(begin, end), List(begin - end))
+          case l: Leaf => Tensor1D.fromRangeTree(a, l)
           case b: Branch => throw new Exception("Malformed RangeTree for 2D tensor")
         }.toArray
         case l: Leaf => throw new Exception("Malformed RangeTree for 2D tensor")
       }
 
     new Tensor2D(data, shape)
+  }
+}
+
+
+
+case class Tensor3D[T](data: Array[Tensor2D[T]], shape: List[Int]) extends TensorStatic[T] {
+  override def rank: Int = 3
+  override def size: Int = data.map(_.size).sum
+
+  def map[B: ClassTag](f: T => B): Tensor3D[B] =
+    Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]), shape)
+  override def toString: String = "Tensor3D(" + data.mkString(", ") + ")"
+  override def toList: List[List[List[T]]] = data.collect { _.toList }.toList
+  def apply(i0: Int, i1: Int, i2: Int): T = data(i0)(i1, i2)
+
+}
+
+object Tensor3D {
+  def fromRangeTree[T: ClassTag](a: Array[T], rg: RangeTree): Tensor3D[T] = {
+    require(RangeTree.depth(rg) == 3, s"Cannot contstruct Tensor3D from tree $rg")
+    val shape = RangeTree.shape(rg)
+
+    val data: Array[Tensor2D[T]] =
+      rg match {
+        case Branch(children) => children.collect{
+          case b: Branch => Tensor2D.fromRangeTree(a, b)
+          case l: Leaf  => throw new Exception("Malformed RangeTree for 2D tensor")
+        }.toArray
+        case l: Leaf => throw new Exception("Malformed RangeTree for 2D tensor")
+      }
+
+    new Tensor3D(data, shape)
   }
 }
