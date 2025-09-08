@@ -117,6 +117,12 @@ object TensorDynamic {
     flat.map(_.asInstanceOf[T]) // safe because caller controls T
   }
 
+  // 1D case
+  def apply[D: ClassTag](a: Seq[D]): TensorDynamic[D] = {
+    val i = Indexer(List(a.length))
+    new TensorDynamic[D](a, i)
+  }
+
   def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
     val i = Indexer(shape)
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
