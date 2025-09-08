@@ -40,7 +40,7 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
   override def rank: Int = 1
   override def size: Int = data.length
 
-  def map[B: ClassTag](f: T => B): TensorStatic[B] =  Tensor1D[B](data.map(f), shape)
+  override def map[B: ClassTag](f: T => B): Tensor1D[B] =  Tensor1D[B](data.map(f), shape)
   override def toString: String = "Tensor1D(" + data.mkString(", ") + ")"
   override def toList: List[T] = data.toList
 
@@ -67,7 +67,7 @@ case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends Tenso
   override def rank: Int = 2
   override def size: Int = data.map(_.size).sum
 
-  def map[B: ClassTag](f: T => B): Tensor2D[B] =
+  override def map[B: ClassTag](f: T => B): Tensor2D[B] =
     Tensor2D[B](data.map(_.map(f).asInstanceOf[Tensor1D[B]]), shape)
   override def toString: String = "Tensor2D(" + data.mkString(", ") + ")"
   override def toList: List[List[T]] =
@@ -101,7 +101,7 @@ case class Tensor3D[T](data: Array[Tensor2D[T]], shape: List[Int]) extends Tenso
   override def rank: Int = 3
   override def size: Int = data.map(_.size).sum
 
-  def map[B: ClassTag](f: T => B): Tensor3D[B] =
+  override def map[B: ClassTag](f: T => B): Tensor3D[B] =
     Tensor3D[B](data.map(_.map(f).asInstanceOf[Tensor2D[B]]), shape)
   override def toString: String = "Tensor3D(" + data.mkString(", ") + ")"
   override def toList: List[List[List[T]]] = data.collect { _.toList }.toList
