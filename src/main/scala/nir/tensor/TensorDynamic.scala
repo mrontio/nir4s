@@ -2,6 +2,7 @@ package nir.tensor
 
 import io.jhdf.api.Dataset
 import scala.reflect.ClassTag
+import scala.language.implicitConversions
 
 
 /* Dynamic Tensor
@@ -120,7 +121,7 @@ object TensorDynamic {
   // 1D case
   def apply[D: ClassTag](a: Seq[D]): TensorDynamic[D] = {
     val i = Indexer(List(a.length))
-    new TensorDynamic[D](a, i)
+    new TensorDynamic[D](a.toArray, i)
   }
 
   def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
@@ -140,4 +141,7 @@ object TensorDynamic {
 
     new TensorDynamic(flattenDatasetArray[D](d), idx)
   }
+
+  // Implicit conversions to Static
+  implicit def toStaticConv[T](td: TensorDynamic[T]): TensorStatic[T] = td.toStatic
 }

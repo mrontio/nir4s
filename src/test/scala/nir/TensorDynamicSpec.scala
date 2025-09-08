@@ -7,7 +7,7 @@ import io.jhdf.HdfFile
 import io.jhdf.api.{Attribute, Dataset, Group, Node}
 import scala.jdk.CollectionConverters._
 
-import tensor.{TensorDynamic}
+import tensor._
 
 class TensorDynamicSpec extends FunSuite {
   val conv1Path = "src/test/scala/nir/samples/conv1/network.nir"
@@ -96,5 +96,16 @@ class TensorDynamicSpec extends FunSuite {
 
       assert(matchedRank == expectedRank, s"Expected rank $expectedRank, got $matchedRank")
     }
+  }
+
+  test("Implicit static conversion") {
+    val data = Array(
+      3.14, 2.718, 6.626,
+      1.618, 0.577, 4.669,
+      2.502, 1.414, 1.732
+    ) // 9 elements
+
+    val td = TensorDynamic(data)
+    val ts: TensorStatic[Double] = td
   }
 }
