@@ -34,6 +34,12 @@ sealed trait TensorStatic[T] {
  class ShapeException(message: String) extends IllegalArgumentException(message)
 }
 
+/** One-dimensional tensor backed by an array.
+  *
+  * The number of elements equals the single dimension in `shape`.
+  * Example: `Tensor1D(Array(1,2,3), List(3))` represents the vector
+  * \(\mathbf{v} = (1,2,3)\).
+  */
 case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T] {
   // TODO: Somehow make this compile-safe, _without_ writing 500 lines of code.
   require(shape.length == 1)
@@ -65,6 +71,13 @@ object Tensor1D {
   }
 }
 
+/** Two-dimensional tensor stored as an array of rows.
+  *
+  * Its total size is given by \(\prod_i \text{shape}_i\).
+  *
+  * @param data nested 1D tensors representing rows
+  * @param shape dimensions of the tensor
+  */
 case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends TensorStatic[T] {
   override def rank: Int = 2
   override def length: Int = data.length
@@ -100,6 +113,11 @@ object Tensor2D {
 
 
 
+/** Three-dimensional tensor represented as an array of 2D slices.
+  *
+  * @param data slices composing this tensor
+  * @param shape dimensions of the tensor
+  */
 case class Tensor3D[T](data: Array[Tensor2D[T]], shape: List[Int]) extends TensorStatic[T] {
   override def rank: Int = 3
   override def length: Int = data.length

@@ -12,7 +12,14 @@ import scala.language.implicitConversions
  */
 
 
-// Indexer class to index 1D array in Tensor
+/** Utility to translate multidimensional tensor indices into a single
+  * row-major offset.
+  *
+  * For a tensor of shape `(2, 3)` the index `(1, 2)` is computed as
+  * \(1 \times 3 + 2 = 5\).
+  *
+  * @param shape dimensions of the tensor in each axis
+  */
 case class Indexer(shape: List[Int]) {
 
   def rank: Int = shape.length

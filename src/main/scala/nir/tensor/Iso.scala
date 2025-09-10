@@ -10,7 +10,19 @@ sealed trait Shape
 
 // Tree of indices for flat array.
 sealed trait RangeTree
+/** Leaf node representing the half-open interval \[begin, end) in the
+  * flattened tensor index space.
+  *
+  * @param begin starting index (inclusive)
+  * @param end ending index (exclusive)
+  */
 case class Leaf(begin: Int, end: Int) extends RangeTree
+
+/** Branch node composed of child ranges, used to model multidimensional
+  * tensor shapes.
+  *
+  * @param children nested range tree elements
+  */
 case class Branch(children: List[RangeTree]) extends RangeTree
 
 

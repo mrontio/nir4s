@@ -3,12 +3,25 @@ package nir
 
 import tensor._
 
+/** Unresolved graph node identified only by string IDs for its
+  * predecessors.
+  *
+  * @param id unique identifier for this node
+  * @param prevIds identifiers of predecessor nodes
+  * @param params operation parameters for this node
+  */
 case class RawNode(
   id:      String,
   prevIds: Set[String],
   params:  NIRParams
 )
 
+/** Resolved node within a NIR graph.
+  *
+  * @param id unique identifier for this node
+  * @param previous actual predecessor nodes
+  * @param params operation parameters associated with this node
+  */
 case class NIRNode(
   id:       String,
   previous: Set[NIRNode],
@@ -25,6 +38,16 @@ sealed trait NIRParams {
   def toString: String
 }
 
+/** Parameters describing a one-dimensional convolution operation.
+  *
+  * @param weight filter weights with shape `(out, in, k)`
+  * @param bias bias tensor
+  * @param stride stride along the spatial dimension
+  * @param padding zero-padding applied to the input
+  * @param dilation dilation factor of the kernel
+  * @param groups number of groups the input is split into
+  * @param input_shape length of the input signal
+  */
 final case class Conv1DParams(
   weight: TensorStatic[Float],
   bias: TensorStatic[Float],
@@ -50,6 +73,16 @@ final case class Conv1DParams(
   }
 }
 
+/** Parameters describing a two-dimensional convolution operation.
+  *
+  * @param weight filter weights `(out, in, kH, kW)`
+  * @param bias bias tensor
+  * @param stride strides along height and width
+  * @param padding padding along height and width
+  * @param dilation dilation factors
+  * @param groups grouping factor
+  * @param input_shape spatial dimensions of the input
+  */
 final case class Conv2DParams(
   weight: TensorStatic[Float],
   bias: TensorStatic[Float],
@@ -75,6 +108,12 @@ final case class Conv2DParams(
   }
 }
 
+/** Parameters for flattening a tensor into a lower rank.
+  *
+  * @param start_dim first dimension to flatten
+  * @param end_dim last dimension to flatten
+  * @param input_type original tensor shape
+  */
 final case class FlattenParams(
   start_dim: Long,
   end_dim: Long,
@@ -86,6 +125,12 @@ final case class FlattenParams(
   }
 }
 
+/** Parameters for two-dimensional sum pooling.
+  *
+  * @param kernel_size size of the pooling window
+  * @param padding padding applied before pooling
+  * @param stride step of the pooling window
+  */
 final case class SumPool2DParams(
   kernel_size: TensorStatic[Long],
   padding: TensorStatic[Long],
@@ -98,6 +143,12 @@ final case class SumPool2DParams(
 }
 
 
+/** Leaky integrator neuron parameters.
+  *
+  * @param tau time constant
+  * @param r resistance
+  * @param v_leak leak potential
+  */
 final case class LIParams(
   tau: TensorStatic[Float],
   r: TensorStatic[Float],
@@ -109,6 +160,12 @@ final case class LIParams(
   }
 }
 
+/** Integrate-and-fire neuron parameters.
+  *
+  * @param r membrane resistance
+  * @param v_reset reset potential
+  * @param v_threshold firing threshold
+  */
 final case class IFParams(
   r: TensorStatic[Float],
   v_reset: TensorStatic[Float],
@@ -120,6 +177,13 @@ final case class IFParams(
   }
 }
 
+/** Leaky integrate-and-fire neuron parameters.
+  *
+  * @param tau membrane time constant
+  * @param r membrane resistance
+  * @param v_leak leak potential
+  * @param v_threshold firing threshold
+  */
 final case class LIFParams(
   tau: TensorStatic[Float],
   r: TensorStatic[Float],
@@ -132,6 +196,12 @@ final case class LIFParams(
   }
 }
 
+/** Current-based LIF neuron parameters with excitatory and inhibitory time constants.
+  *
+  * @param tau membrane time constant
+  * @param tauSynExc excitatory synapse constant
+  * @param tauSynInh inhibitory synapse constant
+  */
 final case class CubaLIFParams(
   tau: TensorStatic[Float],
   tauSynExc: TensorStatic[Float],
@@ -143,6 +213,10 @@ final case class CubaLIFParams(
   }
 }
 
+/** Parameters of a linear transformation.
+  *
+  * @param weight transformation matrix
+  */
 final case class LinearParams(
   weight: TensorStatic[Float],
 ) extends NIRParams {
@@ -152,6 +226,11 @@ final case class LinearParams(
   }
 }
 
+/** Parameters of an affine transformation.
+  *
+  * @param bias bias vector
+  * @param weight weight matrix
+  */
 final case class AffineParams(
   bias: TensorStatic[Float],
   weight: TensorStatic[Float],
@@ -162,6 +241,10 @@ final case class AffineParams(
   }
 }
 
+/** Parameters describing the input node of a graph.
+  *
+  * @param shape shape of the incoming tensor
+  */
 final case class InputParams(
   shape: TensorStatic[Long],
 ) extends NIRParams {
@@ -171,6 +254,10 @@ final case class InputParams(
   }
 }
 
+/** Parameters describing the output node of a graph.
+  *
+  * @param shape shape of the produced tensor
+  */
 final case class OutputParams(
   shape: TensorStatic[Long],
 ) extends NIRParams {
