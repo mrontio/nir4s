@@ -1,5 +1,4 @@
 name: docs
-
 on:
   push:
     branches: [ main ]
@@ -10,16 +9,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
+
       - uses: sbt/setup-sbt@v1
       - run: sbt doc
+
+      # install mkdocs
+      - run: pip install mkdocs mkdocs-material
+
+      # copy scaladoc into docs/api
       - run: |
-          mkdir site
-          cp -r target/scala-*/api site/api
-          cp docs/index.html site/index.html
+          mkdir -p docs/api
+          cp -r target/scala-*/api/* docs/api/
+
+      # build MkDocs site
+      - run: mkdocs build --site-dir site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

@@ -1,0 +1,10 @@
+site_name: NIR 4 Scala
+repo_url: https://github.com/mrontio/nir4s
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Guide: guide.md
+  - API Reference: api/
