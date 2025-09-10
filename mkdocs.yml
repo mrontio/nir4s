@@ -8,5 +8,9 @@ theme:
 
 nav:
   - Home: index.md
-  - Guide: guide.md
+  - Guide:
+    - Installation: guide/installation.md
+    - Importing a NIR Graph: guide/import.md
+    - Using a NIR Graph: guide/using.md
+
   - API Reference: api/
