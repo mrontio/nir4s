@@ -2,6 +2,10 @@ package nir
 
 import java.io.File
 
+/** Directed graph composed of NIR nodes.
+  *
+  * @param nodes collection of nodes forming the graph
+  */
 case class NIRGraph(nodes: Set[NIRNode]) {
   val input: NIRNode = nodes.find(_.previous.size == 0).get
   val output: NIRNode = nodes.find(_.params.nirType == "Output")
