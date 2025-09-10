@@ -11,6 +11,7 @@ lif = norse.torch.LIFBoxCell(p=norse.torch.LIFBoxParameters(
             v_leak=torch.tensor([0.]),
         ))
 
-sample_data = torch.ones((100, 1))
+sample_data = torch.ones((1))
 nir_graph = norse.torch.to_nir(torch.nn.Sequential(lif), sample_data)
+nir_graph.infer_types()
 nir.write("network.nir", nir_graph)
