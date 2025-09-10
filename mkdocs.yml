@@ -1,5 +1,7 @@
 site_name: NIR 4 Scala
 repo_url: https://github.com/mrontio/nir4s
+site_url: https://mront.io/nir4s/
+
 
 theme:
   name: readthedocs
