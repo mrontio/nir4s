@@ -14,6 +14,7 @@ import shapeless.HList
 sealed trait TensorStatic[T] {
   val shape: List[Int]
   def rank: Int
+  def length: Int
   def size: Int
 
   def toString: String
@@ -38,6 +39,7 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
   require(shape.length == 1)
 
   override def rank: Int = 1
+  override def length: Int = data.length
   override def size: Int = data.length
 
   override def map[B: ClassTag](f: T => B): Tensor1D[B] =  Tensor1D[B](data.map(f), shape)
@@ -65,6 +67,7 @@ object Tensor1D {
 
 case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends TensorStatic[T] {
   override def rank: Int = 2
+  override def length: Int = data.length
   override def size: Int = data.map(_.size).sum
 
   override def map[B: ClassTag](f: T => B): Tensor2D[B] =
@@ -99,6 +102,7 @@ object Tensor2D {
 
 case class Tensor3D[T](data: Array[Tensor2D[T]], shape: List[Int]) extends TensorStatic[T] {
   override def rank: Int = 3
+  override def length: Int = data.length
   override def size: Int = data.map(_.size).sum
 
   override def map[B: ClassTag](f: T => B): Tensor3D[B] =
