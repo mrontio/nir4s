@@ -14,7 +14,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: sbt/setup-sbt@v2
+      - uses: sbt/setup-sbt@v1
       - run: sbt doc
       - run: |
           mkdir site
@@ -35,4 +35,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2
