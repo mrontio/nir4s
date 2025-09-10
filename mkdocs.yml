@@ -9,8 +9,10 @@ theme:
 nav:
   - Home: index.md
   - Guide:
-    - Installation: guide/installation.md
-    - Importing a NIR Graph: guide/import.md
-    - Using a NIR Graph: guide/using.md
+      - Installation: guide/installation.md
+      - Importing a NIR Graph: guide/import.md
+      - Using a NIR Graph: guide/using.md
+  - Concepts:
+      - Tensors: tensors.md
 
   - API Reference: api/

@@ -26,5 +26,4 @@ import nir.{NIRGraph}
 
 val g = NIRGraph(new File("./network.nir"))
 ```
-
 3. That's it! See examples of usage in [Using a NIRGraph](using.md)
