@@ -12,6 +12,8 @@ We need two distinct Tensor implementations to have both flexibility during inte
 | 1D storage array + indexer.                | Inductively defined.             |
 | Conclusion: use for reading in.            | Conclusion: export from dynamic. |
 
+**Why?** We can't predict anything the NIR graph, which has to be runtime-checked anyway, whilst you get a compile-time safe interface to reading NIR files.
+
 ## Comparison by example
 ### Creating
 - TensorDynamic
@@ -38,9 +40,39 @@ td(3, 1)    // Compiles, run-time error!
 ```scala
 val ts: TensorStatic[Int] = new TensorDynamic(List(1, 2, 3, 4, 5, 6), List(2, 3))
 // Must be matched!
-val t1d: Tensor2D[Int] = ts match { t1d: Tensor2D => t1d; _ => println("Did not get 2D tensor!") }
+val t2d: Tensor2D[Int] =
+    ts match {
+        case t2d: Tensor2D => t2d
+        case_              => throw new Exception("Rank not supported.")
+    }
 
 td(0, 1)    // Compiles, runs.
 td(1)       // Does not compile.
 td(3, 1)    // Compiles, run-time error (TODO)!
 ```
+
+## Use within NIRNodes
+Sometimes, the shape for a specific NIR parameter is well-defined.
+
+For example, we know that the `Input` node's `shape` praameter will always be 1-dimensional. Hence, we define it as
+```scala
+final case class InputParams(
+  shape: Tensor1D[Long],
+) extends NIRParams
+```
+In nir4s, this serves as a template for acceptable types.
+
+Other times, you don't know the shape of your parameters.
+
+For example, if the preceding node is `Affine` (dense connection), we know our next `LIF` layer node will have a 1D `tau`, `r`, `v_leak` and `v_threshold`.
+
+However, what if the preceding layer is a `Conv2d` node? Now all the parameters are of dimension 3. As we cannot predict this, we specify the looser (but still statically type-checked) `TensorStatic`.
+```scala
+final case class LIFParams(
+  tau: TensorStatic[Float],
+  r: TensorStatic[Float],
+  v_leak: TensorStatic[Float],
+  v_threshold: TensorStatic[Float],
+) extends NIRParams
+```
+This can then be matched against, as in the "Accessing" section above.
