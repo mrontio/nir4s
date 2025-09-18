@@ -102,4 +102,10 @@ class TensorDynamicSpec extends FunSuite {
     val td = TensorDynamic(3.14, 2.718, 6.626, 1.618, 0.577, 4.669, 2.502, 1.414, 1.732)
     val ts: TensorStatic[Double] = td
   }
+
+  test("From non-flat array") {
+    val shape = List(2, 2, 2, 2)
+    val arr = Array.ofDim[Int](shape(0), shape(1), shape(2), shape(3))
+    TensorDynamic(TensorDynamic.flattenArray(arr), shape)
+  }
 }

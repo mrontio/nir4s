@@ -109,10 +109,17 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
 }
 
 object TensorDynamic {
-
   // Allow to match based on rank
   object Rank {
     def unapply[D](tensor: TensorDynamic[D]): Option[Int] = Some(tensor.rank)
+  }
+
+  def flattenArray[T: ClassTag](a: Any): Any = {
+    if (!a.isInstanceOf[Array[_]]) {
+      throw new IllegalArgumentException("Input must be an array")
+    }
+    val flattened = flattenArrayRecursive(a).toArray
+    flattened
   }
 
   private def flattenArrayRecursive(x: Any): Array[Any] = x match {
@@ -132,6 +139,7 @@ object TensorDynamic {
     new TensorDynamic[D](a.toArray, i)
   }
 
+  // N-D case.
   def apply[D: ClassTag](a: Array[D], shape: List[Int]): TensorDynamic[D] = {
     val i = Indexer(shape)
     if (i.size != a.length) throw new IllegalArgumentException(s"Supplied array is size ${a.length} but shape is over size ${i.size}.")
@@ -152,4 +160,9 @@ object TensorDynamic {
 
   // Implicit conversions to Static
   implicit def toStaticConv[T](td: TensorDynamic[T]): TensorStatic[T] = td.toStatic
+
+
+
+
+
 }
