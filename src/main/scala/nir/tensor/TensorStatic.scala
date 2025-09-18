@@ -142,11 +142,49 @@ object Tensor3D {
       rg match {
         case Branch(children) => children.collect{
           case b: Branch => Tensor2D.fromRangeTree(a, b)
-          case l: Leaf  => throw new Exception("Malformed RangeTree for 2D tensor")
+          case l: Leaf  => throw new Exception("Malformed RangeTree for 3D tensor")
         }.toArray
-        case l: Leaf => throw new Exception("Malformed RangeTree for 2D tensor")
+        case l: Leaf => throw new Exception("Malformed RangeTree for 3D tensor")
       }
 
     new Tensor3D(data, shape)
+  }
+}
+
+/** Three-dimensional tensor represented as an array of 2D slices.
+  *
+  * @param data slices composing this tensor
+  * @param shape dimensions of the tensor
+  */
+case class Tensor4D[T](data: Array[Tensor3D[T]], shape: List[Int]) extends TensorStatic[T] {
+  override def rank: Int = 4
+  override def length: Int = data.length
+  override def size: Int = data.map(_.size).sum
+
+  override def map[B: ClassTag](f: T => B): Tensor4D[B] =
+    Tensor4D[B](data.map(_.map(f).asInstanceOf[Tensor3D[B]]), shape)
+  override def toString: String = "Tensor4D(" + data.mkString(", ") + ")"
+  override def toList: List[List[List[List[T]]]] = data.collect { _.toList }.toList
+
+  override def apply(idx: Int*): T = data(idx.head).at(idx.tail)
+  override def at(idx: Seq[Int]): T = data(idx.head).at(idx.tail)
+
+}
+
+object Tensor4D {
+  def fromRangeTree[T: ClassTag](a: Array[T], rg: RangeTree): Tensor4D[T] = {
+    require(RangeTree.depth(rg) == 4, s"Cannot contstruct Tensor4D from tree $rg")
+    val shape = RangeTree.shape(rg)
+
+    val data: Array[Tensor3D[T]] =
+      rg match {
+        case Branch(children) => children.collect{
+          case b: Branch => Tensor3D.fromRangeTree(a, b)
+          case l: Leaf  => throw new Exception("Malformed RangeTree for 4D tensor")
+        }.toArray
+        case l: Leaf => throw new Exception("Malformed RangeTree for 4D tensor")
+      }
+
+    new Tensor4D(data, shape)
   }
 }

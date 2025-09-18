@@ -96,7 +96,8 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
   private val staticConstructors: Map[Int, (Array[D], RangeTree) => TensorStatic[D]] = Map(
     1 -> Tensor1D.fromRangeTree[D],
     2 -> Tensor2D.fromRangeTree[D],
-    3 -> Tensor3D.fromRangeTree[D]
+    3 -> Tensor3D.fromRangeTree[D],
+    4 -> Tensor4D.fromRangeTree[D],
   )
 
   def toStatic: TensorStatic[D] = {
