@@ -7,6 +7,8 @@ import io.jhdf.HdfFile
 import io.jhdf.api.{Attribute, Dataset, Group, Node}
 import scala.jdk.CollectionConverters._
 
+import io.circe.parser._
+
 import tensor._
 
 class TensorDynamicSpec extends FunSuite {
@@ -107,5 +109,36 @@ class TensorDynamicSpec extends FunSuite {
     val shape = List(2, 2, 2, 2)
     val arr = Array.ofDim[Int](shape(0), shape(1), shape(2), shape(3))
     TensorDynamic(TensorDynamic.flattenArray(arr), shape)
+  }
+
+  test("Import from JSON") {
+    val json =
+      """
+        [
+          [
+            [
+              [1.0, 2.0],
+              [3.0, 4.0]
+            ],
+            [
+              [5.0, 6.0],
+              [7.0, 8.0]
+            ]
+          ]
+        ]
+      """
+
+    val decoded = decode[TensorDynamic[Double]](json)
+
+    assert(decoded.isRight, "JSON should decode successfully")
+
+    val expectedFlat = List(List(List(List(1.0, 2.0), List(3.0, 4.0)), List(List(5.0, 6.0), List(7.0, 8.0))))
+
+    decoded match {
+      case Right(tensor: TensorDynamic[Double]) =>
+        assert(tensor.toList == expectedFlat, "Flat data should match")
+      case Left(err) =>
+        fail(s"Decoding failed: $err")
+    }
   }
 }

@@ -2,8 +2,11 @@ package nir.tensor
 
 import io.jhdf.api.Dataset
 import scala.reflect.ClassTag
+import scala.util.matching.Regex
 import scala.language.implicitConversions
 
+// JSON Parsing
+import io.circe.{Decoder, HCursor, Json}
 
 /* Dynamic Tensor
  * Dynamic construction of a tensor from runtime / unknown shape size.
@@ -162,7 +165,34 @@ object TensorDynamic {
   implicit def toStaticConv[T](td: TensorDynamic[T]): TensorStatic[T] = td.toStatic
 
 
+  implicit val doubleLoader: Decoder[TensorDynamic[Double]] = Decoder.instance { cursor =>
+    val rawJson: Json = cursor.value
 
+    def flatten(json: Json): List[Double] = {
+      json.asArray match {
+        case Some(arr) => arr.toList.flatMap(flatten)
+        case None =>
+          json.asNumber.map(_.toDouble) match {
+            case Some(d) => List(d)
+            case None    => Nil
+          }
+      }
+    }
 
+    def inferShape(json: Json): List[Int] = {
+      json.asArray match {
+        case Some(arr) if arr.nonEmpty =>
+          val headShape = inferShape(arr.head)
+          List(arr.size) ++ headShape
+        case Some(arr) => List(0)
+        case None => Nil
+      }
+    }
+
+    val flatValues = flatten(rawJson).toArray
+    val indexer = new Indexer(inferShape(rawJson))
+
+    Right(new TensorDynamic(flatValues, indexer))
+  }
 
 }
