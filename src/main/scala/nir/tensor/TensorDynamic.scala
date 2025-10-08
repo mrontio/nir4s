@@ -130,6 +130,20 @@ object TensorDynamic {
     case v           => Array(v)
   }
 
+  def flattenList[T: ClassTag](a: Any): Any = {
+    if (!a.isInstanceOf[List[_]]) {
+      throw new IllegalArgumentException("Input must be List[_]")
+    }
+    val flattened = flattenListRecursive(a).toList
+    flattened
+  }
+
+  private def flattenListRecursive(x: Any): List[Any] = x match {
+    case a: List[_] => a.flatMap(flattenListRecursive)
+    case v           => List(v)
+  }
+
+
   private def flattenDatasetArray[T: ClassTag](d: Dataset): Array[T] = {
     val rawData = d.getData // e.g. Array[Float], Array[Array[Float]], etc.
     val flat: Array[Any] = flattenArrayRecursive(rawData)
@@ -159,6 +173,12 @@ object TensorDynamic {
     require(actualType == expectedType, s"For dataset <${d.getName}>, expected type $expectedType but got $actualType.")
 
     new TensorDynamic(flattenDatasetArray[D](d), idx)
+  }
+
+  def apply[D: ClassTag](l: List[_], shape: List[Int]): TensorDynamic[D] = {
+    val idx = Indexer(shape)
+    val data: Array[D] = flattenList(l).asInstanceOf[List[D]].toArray
+    new TensorDynamic(data, idx)
   }
 
   // Implicit conversions to Static

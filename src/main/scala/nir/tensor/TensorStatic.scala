@@ -31,6 +31,9 @@ sealed trait TensorStatic[T] {
   // Ambiguous type will be over-written by children
   def toList: List[_]
 
+  def toDynamic[T: ClassTag]: TensorDynamic[T] = TensorDynamic[T](toList, shape)
+
+
  class ShapeException(message: String) extends IllegalArgumentException(message)
 }
 
@@ -54,6 +57,7 @@ case class Tensor1D[T](data: Array[T], shape: List[Int]) extends TensorStatic[T]
 
   override def apply(idx: Int*): T = data(idx.head)
   override def at(idx: Seq[Int]): T = data(idx.head)
+
 }
 
 object Tensor1D {
@@ -91,6 +95,7 @@ case class Tensor2D[T](data: Array[Tensor1D[T]], shape: List[Int]) extends Tenso
 
   override def apply(idx: Int*): T = data(idx.head).at(idx.tail)
   override def at(idx: Seq[Int]): T = data(idx.head).at(idx.tail)
+
 }
 
 object Tensor2D {
