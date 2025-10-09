@@ -58,89 +58,89 @@ object NIRFileMapper {
     val params = getData[String]("type") match {
       case "Input" =>
         InputParams(
-          shape      = TensorDynamic[Long](getDataset("shape")).squeeze.toStatic
+          shape      = TensorDynamic[Long](getDataset("shape")).toStatic
         )
 
       case "Output" =>
         OutputParams(
-          shape      = TensorDynamic[Long](getDataset("shape")).squeeze.toStatic
+          shape      = TensorDynamic[Long](getDataset("shape")).toStatic
         )
 
 
       case "IF" =>
         IFParams(
-          r           = TensorDynamic[Float](getDataset("r")).squeeze.toStatic,
-          v_reset      = TensorDynamic[Float](getDataset("v_reset")).squeeze.toStatic,
-          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).squeeze.toStatic
+          r           = TensorDynamic[Float](getDataset("r")).toStatic,
+          v_reset      = TensorDynamic[Float](getDataset("v_reset")).toStatic,
+          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).toStatic
         )
 
       case "LIF" =>
         LIFParams(
-          tau         = TensorDynamic[Float](getDataset("tau")).squeeze.toStatic,
-          r           = TensorDynamic[Float](getDataset("r")).squeeze.toStatic,
-          v_leak      = TensorDynamic[Float](getDataset("v_leak")).squeeze.toStatic,
-          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).squeeze.toStatic
+          tau         = TensorDynamic[Float](getDataset("tau")).toStatic,
+          r           = TensorDynamic[Float](getDataset("r")).toStatic,
+          v_leak      = TensorDynamic[Float](getDataset("v_leak")).toStatic,
+          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).toStatic
         )
 
       case "CubaLIF" =>
         CubaLIFParams(
-          tau        = TensorDynamic[Float](getDataset("tau")).squeeze.toStatic,
-          tauSynExc  = TensorDynamic[Float](getDataset("tauSynExc")).squeeze.toStatic,
-          tauSynInh  = TensorDynamic[Float](getDataset("tauSynInh")).squeeze.toStatic
+          tau        = TensorDynamic[Float](getDataset("tau")).toStatic,
+          tauSynExc  = TensorDynamic[Float](getDataset("tauSynExc")).toStatic,
+          tauSynInh  = TensorDynamic[Float](getDataset("tauSynInh")).toStatic
         )
 
       case "Linear" =>
         LinearParams(
-          weight = TensorDynamic[Float](getDataset("weight")).squeeze.toStatic
+          weight = TensorDynamic[Float](getDataset("weight")).toStatic
         )
 
       case "LI" =>
         LIParams(
-          tau = TensorDynamic[Float](getDataset("tau")).squeeze.toStatic,
-          r = TensorDynamic[Float](getDataset("r")).squeeze.toStatic,
-          v_leak = TensorDynamic[Float](getDataset("v_leak")).squeeze.toStatic
+          tau = TensorDynamic[Float](getDataset("tau")).toStatic,
+          r = TensorDynamic[Float](getDataset("r")).toStatic,
+          v_leak = TensorDynamic[Float](getDataset("v_leak")).toStatic
         )
 
       case "Affine" =>
         AffineParams(
-          bias        = TensorDynamic[Float](getDataset("bias")).squeeze.toStatic,
-          weight      = TensorDynamic[Float](getDataset("weight")).squeeze.toStatic
+          bias        = TensorDynamic[Float](getDataset("bias")).toStatic,
+          weight      = TensorDynamic[Float](getDataset("weight")).toStatic
         )
 
       case "Conv1d" =>
         Conv1DParams(
-          weight = TensorDynamic[Float](getDataset("weight")).squeeze.toStatic,
-          bias = TensorDynamic[Float](getDataset("bias")).squeeze.toStatic,
-          stride = TensorDynamic[Long](getDataset("stride")).squeeze.toStatic,
-          padding = TensorDynamic[Long](getDataset("padding")).squeeze.toStatic,
-          dilation = TensorDynamic[Long](getDataset("dilation")).squeeze.toStatic,
+          weight = TensorDynamic[Float](getDataset("weight")).toStatic,
+          bias = TensorDynamic[Float](getDataset("bias")).toStatic,
+          stride = TensorDynamic[Long](getDataset("stride")).toStatic,
+          padding = TensorDynamic[Long](getDataset("padding")).toStatic,
+          dilation = TensorDynamic[Long](getDataset("dilation")).toStatic,
           groups = getData[Long]("groups"),
           input_shape = getData[Long]("input_shape")
         )
 
       case "Conv2d" =>
         Conv2DParams(
-          weight = TensorDynamic[Float](getDataset("weight")).squeeze.toStatic,
-          bias = TensorDynamic[Float](getDataset("bias")).squeeze.toStatic,
-          stride = TensorDynamic[Long](getDataset("stride")).squeeze.toStatic,
-          padding = TensorDynamic[Long](getDataset("padding")).squeeze.toStatic,
-          dilation = TensorDynamic[Long](getDataset("dilation")).squeeze.toStatic,
+          weight = TensorDynamic[Float](getDataset("weight")).toStatic,
+          bias = TensorDynamic[Float](getDataset("bias")).toStatic,
+          stride = TensorDynamic[Long](getDataset("stride")).toStatic,
+          padding = TensorDynamic[Long](getDataset("padding")).toStatic,
+          dilation = TensorDynamic[Long](getDataset("dilation")).toStatic,
           groups = getData[Long]("groups"),
-          input_shape = TensorDynamic[Long](getDataset("input_shape")).squeeze.toStatic
+          input_shape = TensorDynamic[Long](getDataset("input_shape")).toStatic
         )
 
       case "Flatten" =>
         FlattenParams(
           start_dim = getData[Long]("start_dim"),
           end_dim = getData[Long]("end_dim"),
-          input_type = TensorDynamic[Long](getDataset("input_type")).squeeze.toStatic
+          input_type = TensorDynamic[Long](getDataset("input_type")).toStatic
         )
 
       case "SumPool2d" =>
         SumPool2DParams(
-          kernel_size = TensorDynamic[Long](getDataset("kernel_size")).squeeze.toStatic,
-            padding = TensorDynamic[Long](getDataset("padding")).squeeze.toStatic,
-            stride = TensorDynamic[Long](getDataset("stride")).squeeze.toStatic
+          kernel_size = TensorDynamic[Long](getDataset("kernel_size")).toStatic,
+            padding = TensorDynamic[Long](getDataset("padding")).toStatic,
+            stride = TensorDynamic[Long](getDataset("stride")).toStatic
         )
 
       case other =>
