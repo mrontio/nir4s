@@ -81,6 +81,8 @@ case class Indexer(shape: List[Int]) {
 }
 
 class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
+  assert(data.length == idx.shape.reduce(_ * _), s"Invalid shape ${idx.shape} for tensor of size ${data.length}")
+
   val shape = idx.shape
   val rank = idx.rank
   val size = idx.size
