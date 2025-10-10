@@ -5,6 +5,10 @@ import scala.reflect.ClassTag
 import scala.util.matching.Regex
 import scala.language.implicitConversions
 
+import java.io.PrintWriter
+
+
+
 // JSON Parsing
 import io.circe.{Decoder, HCursor, Json}
 
@@ -109,6 +113,16 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
       case None => throw new Exception(s"Static tensors of dimension $rank are not yet supported.")
     }
   }
+
+  def save(path: String): Unit = {
+    val writer = new PrintWriter(s"$path")
+
+    writer.println(shape.mkString(" "))
+    data.foreach(writer.println)
+    writer.close()
+  }
+
+
 }
 
 object TensorDynamic {

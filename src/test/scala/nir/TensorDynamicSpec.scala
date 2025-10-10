@@ -102,6 +102,7 @@ class TensorDynamicSpec extends FunSuite {
 
   test("Implicit static conversion") {
     val td = TensorDynamic(3.14, 2.718, 6.626, 1.618, 0.577, 4.669, 2.502, 1.414, 1.732)
+
     val ts: TensorStatic[Double] = td
   }
 
@@ -140,5 +141,14 @@ class TensorDynamicSpec extends FunSuite {
       case Left(err) =>
         fail(s"Decoding failed: $err")
     }
+  }
+
+  test("Saving the file") {
+    val td = TensorDynamic(
+      3.14, 2.718, 6.626, 1.618, 2.122,
+      0.577, 4.669, 2.502, 1.414, 1.732)
+      .reshape(2, 5)
+
+    td.save("./test.txt")
   }
 }
