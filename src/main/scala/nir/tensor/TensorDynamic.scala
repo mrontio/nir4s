@@ -127,7 +127,7 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
       s"\twith open(\"$path\") as f:\n" +
       "\t\tshape = list(map(int, f.readline().split()))\n" +
       "\t\tdata = np.loadtxt(f)\n" +
-      "\ta = data.reshape(shape)\n" +
+      "\ta = data.reshape(shape)\n")
   }
 
 
