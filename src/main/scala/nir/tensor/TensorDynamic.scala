@@ -120,6 +120,14 @@ class TensorDynamic[D: ClassTag](data: Array[D], idx: Indexer) {
     writer.println(shape.mkString(" "))
     data.foreach(writer.println)
     writer.close()
+    println(s"Save to ${path} success, use this file from Python with:\n" +
+      "import numpy as np\n" +
+      s"with open(\"$path\") as f:\n" +
+      "shape = list(map(int, f.readline().split()))\n" +
+      "data = np.loadtxt(f)\n" +
+      "a = data.reshape(shape)\n" +
+      s"np.save(\"$path\", a)")
+
   }
 
 
