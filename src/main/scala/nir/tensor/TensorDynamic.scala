@@ -144,11 +144,11 @@ object TensorDynamic {
     case v           => Array(v)
   }
 
-  def flattenList[T: ClassTag](a: Any): Any = {
+  def flattenList[T: ClassTag](a: Any): List[T] = {
     if (!a.isInstanceOf[List[_]]) {
       throw new IllegalArgumentException("Input must be List[_]")
     }
-    val flattened = flattenListRecursive(a).toList
+    val flattened = flattenListRecursive(a).toList.asInstanceOf[List[T]]
     flattened
   }
 
