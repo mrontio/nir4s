@@ -151,4 +151,10 @@ class TensorDynamicSpec extends FunSuite {
 
     td.save("./test.txt")
   }
+
+  test("From Numpy") {
+    val td = TensorDynamic.fromNumpy[Double]("src/test/scala/nir/samples/0.npy")
+
+    println(td.shape)
+  }
 }

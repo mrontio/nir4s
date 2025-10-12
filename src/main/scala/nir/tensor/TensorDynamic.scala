@@ -4,9 +4,12 @@ import io.jhdf.api.Dataset
 import scala.reflect.ClassTag
 import scala.util.matching.Regex
 import scala.language.implicitConversions
-
 import java.io.PrintWriter
-
+import java.nio.file.Paths
+import java.nio._
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
+import scala.reflect.ClassTag
 
 
 // JSON Parsing
@@ -203,6 +206,75 @@ object TensorDynamic {
     new TensorDynamic(data, idx)
   }
 
+  // This is ChatGPT-d due to time, need to look over later.
+  def fromNumpy[D: ClassTag](path: String): TensorDynamic[D] = {
+    val bytes = Files.readAllBytes(Paths.get(path))
+    val bb = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+
+    // Check magic string
+    val magic = new Array[Byte](6)
+    bb.get(magic)
+    val isValidNumpy = magic(0) == 0x93.toByte &&
+      magic(1) == 'N' &&
+      magic(2) == 'U' &&
+      magic(3) == 'M' &&
+      magic(4) == 'P' &&
+      magic(5) == 'Y'
+    require(isValidNumpy, s"Not a valid .npy file (found magic bytes: ${magic.map(b => f"0x${b & 0xFF}%02x").mkString(", ")})")
+
+
+    // Header info
+    val major = bb.get()
+    val minor = bb.get()
+    val headerLen = bb.getShort() & 0xFFFF
+
+    val headerBytes = new Array[Byte](headerLen)
+    bb.get(headerBytes)
+    val header = new String(headerBytes, StandardCharsets.US_ASCII)
+
+    // Parse dtype and shape from header
+    val dtype = "'descr':\\s*'([^']+)'".r.findFirstMatchIn(header).map(_.group(1)).getOrElse("")
+    val shape = "\\(([^)]*)\\)".r.findFirstMatchIn(header)
+      .map(_.group(1).split(",").map(_.trim).filter(_.nonEmpty).map(_.toInt).toList)
+      .getOrElse(Nil)
+
+    val fortranOrder = "'fortran_order':\\s*(True|False)".r
+      .findFirstMatchIn(header)
+      .exists(_.group(1) == "True")
+
+    require(!fortranOrder, "fromNumpy currently supports only C-order arrays")
+
+    val dataBytes = new Array[Byte](bb.remaining())
+    bb.get(dataBytes)
+    val dbuf = ByteBuffer.wrap(dataBytes).order(ByteOrder.LITTLE_ENDIAN)
+
+    val data: Array[Double] = dtype match {
+      case "<f8" | "<d" =>
+        val arr = new Array[Double](dataBytes.length / 8)
+        dbuf.asDoubleBuffer().get(arr)
+        arr
+      case "<f4" =>
+        val arr = new Array[Float](dataBytes.length / 4)
+        dbuf.asFloatBuffer().get(arr)
+        arr.map(_.toDouble)
+      case "<i4" =>
+        val arr = new Array[Int](dataBytes.length / 4)
+        dbuf.asIntBuffer().get(arr)
+        arr.map(_.toDouble)
+      case "<i2" =>
+        val arr = new Array[Short](dataBytes.length / 2)
+        dbuf.asShortBuffer().get(arr)
+        arr.map(_.toDouble)
+      case "<u1" =>
+        dataBytes.map(b => (b & 0xFF).toDouble)
+      case other =>
+        throw new IllegalArgumentException(s"Unsupported dtype: $other")
+    }
+
+    val idx = Indexer(shape)
+    new TensorDynamic(data.asInstanceOf[Array[D]], idx)
+  }
+
   // Implicit conversions to Static
   implicit def toStaticConv[T](td: TensorDynamic[T]): TensorStatic[T] = td.toStatic
 
@@ -233,7 +305,6 @@ object TensorDynamic {
 
     val flatValues = flatten(rawJson).toArray
     val indexer = new Indexer(inferShape(rawJson))
-
     Right(new TensorDynamic(flatValues, indexer))
   }
 
