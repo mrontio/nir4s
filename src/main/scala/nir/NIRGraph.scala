@@ -30,6 +30,59 @@ object NIRGraph {
     fromRaw(rawNodes.toSet)
   }
 
+  def reduceConv2DIFSubgraph(graph: NIRGraph): NIRGraph = {
+    // Step 1: Find Conv2D nodes that have IF as previous
+    val ifAfterConv = graph.nodes.filter { node =>
+      node.params.nirType == "IF" &&
+      node.previous.nonEmpty &&
+      node.previous.head.params.nirType == "Conv2d"
+    }
+
+    if (ifAfterConv.isEmpty) {
+      return graph
+    }
+
+
+    // Step 2: Get the matched nodes
+    val ifNode = ifAfterConv.head                  // The IF node
+    val convNode = ifNode.previous.head            // The Conv node (IF.previous)
+    val nodeBeforeConv = convNode.previous.head    // Node before Conv (Conv.previous = Input)
+    val nodeAfterIF = graph.nodes.filter(_.previous.contains(ifNode)).head
+
+    // Step 3: Extract Conv2DParams and create Conv2DIFParams
+    val conv2dParams = convNode.params.asInstanceOf[Conv2DParams]
+    val fusedParams: NIRParams = Conv2DIFParams(
+      weight = conv2dParams.weight,
+      bias = conv2dParams.bias,
+      stride = conv2dParams.stride,
+      padding = conv2dParams.padding,
+      dilation = conv2dParams.dilation,
+      groups = conv2dParams.groups,
+      input_shape = conv2dParams.input_shape
+    )
+
+    // Step 4: Create the fused subgraph node
+    val fusedNode = NIRNode(
+      id = s"fused_${convNode.id}_${ifNode.id}",
+      previous = Set(nodeBeforeConv),
+      params = fusedParams
+    )
+
+    // Step 5: Rebuild the graph - remove IF and Conv, add fused node
+    val newNodes = graph.nodes.flatMap { node =>
+      if (node.id == ifNode.id || node.id == convNode.id) {
+        None  // Remove both nodes
+      } else if (nodeAfterIF == node) {
+        node.previous = Set(fusedNode)
+        Some(node)
+      } else {
+        Some(node)
+      }
+    }
+    // Step 6: Return new graph
+    new NIRGraph(newNodes + fusedNode)
+  }
+
   def fromRaw(rawNodes: Set[RawNode]): NIRGraph = {
     val topRaw = rawNodes.find(_.params.nirType == "Input")
       .getOrElse(throw new Exception("NIR Graph does not contain node type 'Input', please re-generate."))
