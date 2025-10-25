@@ -66,6 +66,10 @@ object NIRFileMapper {
           shape      = TensorDynamic[Long](getDataset("shape")).toStatic
         )
 
+      case "I" =>
+        IParams(
+          r = TensorDynamic[Double](getDataset("r")).map(_.toFloat).toStatic
+        )
 
       case "IF" =>
         IFParams(

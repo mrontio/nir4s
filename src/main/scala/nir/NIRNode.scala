@@ -192,6 +192,16 @@ final case class LIParams(
   }
 }
 
+
+final case class IParams(
+  r: TensorStatic[Float],
+) extends NIRParams {
+  override def nirType: String = "I"
+  override def toString: String = {
+    s"$nirType {\n\tr = ${r.shape},\n}"
+  }
+}
+
 /** Integrate-and-fire neuron parameters.
   *
   * @param r membrane resistance
