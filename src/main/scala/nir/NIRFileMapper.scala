@@ -11,8 +11,7 @@ import tensor._
 object NIRFileMapper {
   def loadGraph(f: File, nodePath: String = "/node/nodes", edgePath: String = "/node/edges"): NIRGraph = {
     if (!f.exists()) {
-      Console.err.println(s"ERROR: file not found: ${f.getAbsolutePath}")
-      sys.exit(2)
+      throw new java.io.FileNotFoundException(s"ERROR: file not found: ${f.getAbsolutePath}")
     }
     val hdf = new HdfFile(f)
     val nodeHDF = hdf.getByPath(nodePath)

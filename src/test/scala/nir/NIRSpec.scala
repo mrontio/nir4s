@@ -45,13 +45,13 @@ class NIRSpec extends FunSuite {
   }
 
 
-  test("Subgraph Reduction") {
-    // val file = new File("src/test/scala/nir/samples/cnn_sinabs/network.nir")
-    val file = new File("/home/mrontio/uni/phd/src/nir-fpga-hackathon/train/tests/bigcnn.nir")
-    val g = NIRGraph(file)
+  // test("Subgraph Reduction") {
+  //   // val file = new File("src/test/scala/nir/samples/cnn_sinabs/network.nir")
+  //   val file = new File("/home/mrontio/uni/phd/src/nir-fpga-hackathon/train/tests/bigcnn.nir")
+  //   val g = NIRGraph(file)
 
-    println(g)
-    val gs = NIRGraph.reduceConv2DIFSubgraph(g)
-    println(gs)
-  }
+  //   println(g)
+  //   val gs = NIRGraph.reduceConv2DIFSubgraph(g)
+  //   println(gs)
+  // }
 }

@@ -153,7 +153,7 @@ class TensorDynamicSpec extends FunSuite {
   }
 
   test("From Numpy") {
-    val td = TensorDynamic.fromNumpy[Double]("src/test/scala/nir/samples/0.npy")
+    val td = TensorDynamic.fromNumpy[Double]("src/test/scala/nir/samples/fashnion-mnist-sample.npy")
 
     println(td.shape)
   }
