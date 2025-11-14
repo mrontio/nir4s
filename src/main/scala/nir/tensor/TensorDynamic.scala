@@ -281,14 +281,28 @@ object TensorDynamic {
 
   implicit val doubleLoader: Decoder[TensorDynamic[Double]] = Decoder.instance { cursor =>
     val rawJson: Json = cursor.value
-
     def flatten(json: Json): List[Double] = {
       json.asArray match {
-        case Some(arr) => arr.toList.flatMap(flatten)
+        case Some(arr) =>
+          arr.toList.flatMap(flatten)
         case None =>
           json.asNumber.map(_.toDouble) match {
-            case Some(d) => List(d)
-            case None    => Nil
+            case Some(d) =>
+              List(d)
+            case None =>
+              val errorMsg = if (json.isObject) {
+                s"❌ Object with keys: ${json.asObject.map(_.keys.mkString(", ")).getOrElse("none")}"
+              } else if (json.isString) {
+                s"❌ String: ${json.asString.getOrElse("")}"  // Other type to consider
+              } else if (json.isBoolean) {
+                s"❌ Boolean: ${json.asBoolean.getOrElse("")}"  // Other type to consider
+              } else if (json.isNull) {
+                s"❌ Null"  // Other type to consider
+              } else {
+                s"❌ Unknown JSON type"
+              }
+              println(errorMsg)
+              throw new NoSuchElementException(errorMsg)
           }
       }
     }
@@ -307,5 +321,4 @@ object TensorDynamic {
     val indexer = new Indexer(inferShape(rawJson))
     Right(new TensorDynamic(flatValues, indexer))
   }
-
 }
