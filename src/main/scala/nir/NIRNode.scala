@@ -109,37 +109,6 @@ final case class Conv2DParams(
 }
 
 
-/** A temporary class that is not part of the NIR standard but I need for our research.
-  * To be removed once subgraphing functionality has been implemented
-  * This is a subgraph Conv2D -> IF
-  */
-final case class Conv2DIFParams(
-  weight: TensorStatic[Float],
-  bias: TensorStatic[Float],
-  stride: TensorStatic[Long],
-  padding: TensorStatic[Long],
-  dilation: TensorStatic[Long],
-  groups: Long,
-  input_shape: TensorStatic[Long]
-) extends NIRParams {
-    def outChannels: List[Int] =
-    List(weight.shape(0))
-
-  def inChannels: List[Int] =
-    List(weight.shape(1))
-
-  def kernelSize: List[Int] =
-    List(weight.shape(2), weight.shape(3))
-
-  override def nirType: String = "Conv2dIF"
-  override def toString: String = {
-    val weightString =  s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
-    s"$nirType {\n\tweights = $weightString,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
-  }
-}
-
-
-
 /** Parameters for flattening a tensor into a lower rank.
   *
   * @param start_dim first dimension to flatten
@@ -306,5 +275,28 @@ final case class OutputParams(
   override def nirType: String = "Output"
   override def toString: String = {
     s"$nirType {\n\tshape = $shape\n}"
+  }
+}
+
+
+
+/**
+  * A temporary class that is not part of the NIR standard but I need for our research.
+  * To be removed once subgraphing functionality has been implemented
+  * This is a subgraph Affine -> LIF
+  */
+final case class AffineLIFParams(
+  // Affine
+  weight: TensorStatic[Float],
+
+  // LIF
+  tau: TensorStatic[Float],
+  r: TensorStatic[Float],
+  v_leak: TensorStatic[Float],
+  v_threshold: TensorStatic[Float],
+) extends NIRParams {
+  override def nirType: String = "AffineLIF"
+  override def toString: String = {
+    s"$nirType {\n\tweight = ${weight.shape}\n\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
   }
 }

@@ -30,49 +30,48 @@ object NIRGraph {
     fromRaw(rawNodes.toSet)
   }
 
-def reduceConv2DIFSubgraph(graph: NIRGraph): NIRGraph = {
-  // Step 1: Find Conv2D nodes that have IF as previous
-  val ifAfterConv = graph.nodes.filter { node =>
-    node.params.nirType == "IF" &&
+def reduceAffineLIF(graph: NIRGraph): NIRGraph = {
+  // Step 1: Find LIF nodes that have Affine as previous
+  val lifAfterAffine = graph.nodes.filter { node =>
+    node.params.nirType == "LIF" &&
     node.previous.nonEmpty &&
-    node.previous.head.params.nirType == "Conv2d"
+    node.previous.head.params.nirType == "Affine"
   }
 
-  if (ifAfterConv.isEmpty) {
+  if (lifAfterAffine.isEmpty) {
     // No more patterns found - we're done
     return graph
   }
 
   // Step 2: Get the matched nodes (process first match)
-  val ifNode = ifAfterConv.head
-  val convNode = ifNode.previous.head
-  val nodeBeforeConv = convNode.previous.head
-  val nodesAfterIF = graph.nodes.filter(_.previous.contains(ifNode))
+  val lifNode = lifAfterAffine.head
+  val affineNode = lifNode.previous.head
+  val nodeBeforeAffine = affineNode.previous.head
+  val nodesAfterLIF = graph.nodes.filter(_.previous.contains(lifNode))
 
-  // Step 3: Extract Conv2DParams and create Conv2DIFParams
-  val conv2dParams = convNode.params.asInstanceOf[Conv2DParams]
-  val fusedParams: NIRParams = Conv2DIFParams(
-    weight = conv2dParams.weight,
-    bias = conv2dParams.bias,
-    stride = conv2dParams.stride,
-    padding = conv2dParams.padding,
-    dilation = conv2dParams.dilation,
-    groups = conv2dParams.groups,
-    input_shape = conv2dParams.input_shape
+  // Step 3: Extract parameters to create AffineIFParams
+  val affineParams = affineNode.params.asInstanceOf[AffineParams]
+  val lifParams = lifNode.params.asInstanceOf[LIFParams]
+  val fusedParams: NIRParams = AffineLIFParams(
+    weight = affineParams.weight,
+    tau = lifParams.tau,
+    r = lifParams.r,
+    v_leak = lifParams.v_leak,
+    v_threshold = lifParams.v_threshold
   )
 
   // Step 4: Create the fused subgraph node
   val fusedNode = NIRNode(
-    id = s"fused_${convNode.id}_${ifNode.id}",
-    previous = Set(nodeBeforeConv),
+    id = s"fused_${affineNode.id}_${lifNode.id}",
+    previous = Set(nodeBeforeAffine),
     params = fusedParams
   )
 
   // Step 5: Rebuild the graph - remove IF and Conv, add fused node
   val newNodes = graph.nodes.flatMap { node =>
-    if (node.id == ifNode.id || node.id == convNode.id) {
+    if (node.id == lifNode.id || node.id == affineNode.id) {
       None  // Remove both nodes
-    } else if (nodesAfterIF.contains(node)) {
+    } else if (nodesAfterLIF.contains(node)) {
       node.previous = Set(fusedNode)
       Some(node)
     } else {
@@ -84,7 +83,7 @@ def reduceConv2DIFSubgraph(graph: NIRGraph): NIRGraph = {
   val updatedGraph = new NIRGraph(newNodes + fusedNode)
 
   // Step 7: Recursively replace remaining patterns
-  reduceConv2DIFSubgraph(updatedGraph)
+  reduceAffineLIF(updatedGraph)
 }
 
   def fromRaw(rawNodes: Set[RawNode]): NIRGraph = {
