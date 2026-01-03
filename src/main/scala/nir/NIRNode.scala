@@ -286,6 +286,10 @@ final case class OutputParams(
   * This is a subgraph Affine -> LIF
   */
 final case class AffineLIFParams(
+  //
+  old_linear_id: String,
+  old_lif_id: String,
+
   // Affine
   weight: TensorStatic[Float],
 
