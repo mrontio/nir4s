@@ -11,7 +11,7 @@ import io.circe.parser._
 
 import tensor._
 
-class TensorDynamicSpec extends FunSuite {
+class TensorSpec extends FunSuite {
   val conv1Path = "src/test/scala/nir/samples/conv1/network.nir"
   val file = new File(conv1Path)
   val hdf = new HdfFile(file)
@@ -22,14 +22,13 @@ class TensorDynamicSpec extends FunSuite {
     }
   }
 
-  test("TensorDynamic handles shapes from 1D to 8D") {
+  test("Tensor handles shapes from 1D to 8D") {
     val data = Array(
       3.14, 2.718, 6.626,
       1.618, 0.577, 4.669,
       2.502, 1.414, 1.732
     ) // 9 elements
 
-    val baseValue = data(0)
     val shapes = List(
       List(9),                  // 1D
       List(3, 3),               // 2D
@@ -42,7 +41,7 @@ class TensorDynamicSpec extends FunSuite {
     )
 
     for (shape <- shapes) {
-      val t = TensorDynamic(data, shape)
+      val t = Tensor(data, shape)
 
       // Confirm shape
       assert(t.shape == shape)
@@ -62,9 +61,9 @@ class TensorDynamicSpec extends FunSuite {
     }
   }
 
-  test("Create TensorDynamic from HDF Dataset") {
+  test("Create Tensor from HDF Dataset") {
     val knownShape = List(16, 16, 3)
-    val t = TensorDynamic[Float](d)
+    val t = Tensor[Float](d)
     val tInt = t.map(_.round.toInt)
     // Reshape to 1D
     val tIntReshape = tInt.reshape(knownShape.product)
@@ -74,42 +73,23 @@ class TensorDynamicSpec extends FunSuite {
     // We have enumerated each value to index so this should be a good check.
     // +1/-1 to account for rounding errors.
     val eqCond = (f: Float, i: Int) => f == i || f == i - 1 || f == i + 1
-    for (i <- 0 until knownShape.product) assert(eqCond(tIntReshape(i), i), s"At TensorDynamic index $i expected $i +-1 but got ${tIntReshape(i)}")
+    for (i <- 0 until knownShape.product) assert(eqCond(tIntReshape(i), i), s"At Tensor index $i expected $i +-1 but got ${tIntReshape(i)}")
     for (i <- 0 until knownShape.product) assert(eqCond(tIntList(i), i), s"At List index $i expected $i +-1 but got ${tIntReshape(i)}")
   }
 
-  test("Match TensorDynamic against TensorDynamic.Rank of ranks 1..5") {
-    def makeShape(rank: Int): List[Int] =
-      List.fill(rank - 1)(1) :+ 6  // always ends with 6 to keep total size consistent
+  test("Access all elements of Tensor") {
+    val td = Tensor(Array(1, 2, 3, 4, 5, 6, 7, 8), List(2, 2, 2))
+    val shape = td.shape
 
-    val tensors = (1 to 5).map { rank =>
-      val shape = makeShape(rank)
-      val size = shape.product
-      TensorDynamic(Array.tabulate(size)(i => i + 1), shape)
+    var counter = 1
+    for {
+      i <- 0 until shape(0)
+      j <- 0 until shape(1)
+      k <- 0 until shape(2)
+    } {
+      assert(td(i, j, k) == counter)
+      counter += 1
     }
-
-    tensors.zipWithIndex.foreach { case (tensor, idx) =>
-      val expectedRank = idx + 1
-
-      val matchedRank = tensor match {
-        case TensorDynamic.Rank(r) => r
-        case _       => -1 // should never hit this
-      }
-
-      assert(matchedRank == expectedRank, s"Expected rank $expectedRank, got $matchedRank")
-    }
-  }
-
-  test("Implicit static conversion") {
-    val td = TensorDynamic(3.14, 2.718, 6.626, 1.618, 0.577, 4.669, 2.502, 1.414, 1.732)
-
-    val ts: TensorStatic[Double] = td
-  }
-
-  test("From non-flat array") {
-    val shape = List(2, 2, 2, 2)
-    val arr = Array.ofDim[Int](shape(0), shape(1), shape(2), shape(3))
-    TensorDynamic(TensorDynamic.flattenArray(arr), shape)
   }
 
   test("Import from JSON") {
@@ -129,14 +109,14 @@ class TensorDynamicSpec extends FunSuite {
         ]
       """
 
-    val decoded = decode[TensorDynamic[Double]](json)
+    val decoded = decode[Tensor[Double]](json)
 
     assert(decoded.isRight, "JSON should decode successfully")
 
     val expectedFlat = List(List(List(List(1.0, 2.0), List(3.0, 4.0)), List(List(5.0, 6.0), List(7.0, 8.0))))
 
     decoded match {
-      case Right(tensor: TensorDynamic[Double]) =>
+      case Right(tensor: Tensor[Double]) =>
         assert(tensor.toList == expectedFlat, "Flat data should match")
       case Left(err) =>
         fail(s"Decoding failed: $err")
@@ -144,17 +124,33 @@ class TensorDynamicSpec extends FunSuite {
   }
 
   test("Saving the file") {
-    val td = TensorDynamic(
-      3.14, 2.718, 6.626, 1.618, 2.122,
-      0.577, 4.669, 2.502, 1.414, 1.732)
-      .reshape(2, 5)
+    val td = Tensor(
+      Array(3.14, 2.718, 6.626, 1.618, 2.122,
+            0.577, 4.669, 2.502, 1.414, 1.732),
+      List(2, 5))
 
     td.save("./test.txt")
   }
 
   test("From Numpy") {
-    val td = TensorDynamic.fromNumpy[Double]("src/test/scala/nir/samples/fashnion-mnist-sample.npy")
+    val td = Tensor.fromNumpy[Double]("src/test/scala/nir/samples/fashnion-mnist-sample.npy")
 
     println(td.shape)
+  }
+
+  test("toList produces correct nested structure") {
+    val data = Array(1, 2, 3, 4, 5, 6)
+    val t = Tensor(data, List(2, 3))
+    val expected = List(List(1, 2, 3), List(4, 5, 6))
+    assertEquals(t.toList, expected)
+  }
+
+  test("squeeze removes singleton dimensions from left") {
+    val data = Array(1, 2, 3, 4)
+    val t = Tensor(data, List(1, 1, 2, 2))
+    val squeezed = t.squeeze
+    assertEquals(squeezed.shape, List(2, 2))
+    assertEquals(squeezed(0, 0), 1)
+    assertEquals(squeezed(1, 1), 4)
   }
 }

@@ -57,93 +57,93 @@ object NIRFileMapper {
     val params = getData[String]("type") match {
       case "Input" =>
         InputParams(
-          shape      = TensorDynamic[Long](getDataset("shape")).toStatic
+          shape = Tensor[Long](getDataset("shape"))
         )
 
       case "Output" =>
         OutputParams(
-          shape      = TensorDynamic[Long](getDataset("shape")).toStatic
+          shape = Tensor[Long](getDataset("shape"))
         )
 
       case "I" =>
         IParams(
-          r = TensorDynamic[Double](getDataset("r")).map(_.toFloat).toStatic
+          r = Tensor[Double](getDataset("r")).map(_.toFloat)
         )
 
       case "IF" =>
         IFParams(
-          r           = TensorDynamic[Float](getDataset("r")).toStatic,
-          v_reset      = TensorDynamic[Float](getDataset("v_reset")).toStatic,
-          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).toStatic
+          r           = Tensor[Float](getDataset("r")),
+          v_reset     = Tensor[Float](getDataset("v_reset")),
+          v_threshold = Tensor[Float](getDataset("v_threshold"))
         )
 
       case "LIF" =>
         LIFParams(
-          tau         = TensorDynamic[Float](getDataset("tau")).toStatic,
-          r           = TensorDynamic[Float](getDataset("r")).toStatic,
-          v_leak      = TensorDynamic[Float](getDataset("v_leak")).toStatic,
-          v_threshold = TensorDynamic[Float](getDataset("v_threshold")).toStatic
+          tau         = Tensor[Float](getDataset("tau")),
+          r           = Tensor[Float](getDataset("r")),
+          v_leak      = Tensor[Float](getDataset("v_leak")),
+          v_threshold = Tensor[Float](getDataset("v_threshold"))
         )
 
       case "CubaLIF" =>
         CubaLIFParams(
-          tau        = TensorDynamic[Float](getDataset("tau")).toStatic,
-          tauSynExc  = TensorDynamic[Float](getDataset("tauSynExc")).toStatic,
-          tauSynInh  = TensorDynamic[Float](getDataset("tauSynInh")).toStatic
+          tau       = Tensor[Float](getDataset("tau")),
+          tauSynExc = Tensor[Float](getDataset("tauSynExc")),
+          tauSynInh = Tensor[Float](getDataset("tauSynInh"))
         )
 
       case "Linear" =>
         LinearParams(
-          weight = TensorDynamic[Float](getDataset("weight")).toStatic
+          weight = Tensor[Float](getDataset("weight"))
         )
 
       case "LI" =>
         LIParams(
-          tau = TensorDynamic[Float](getDataset("tau")).toStatic,
-          r = TensorDynamic[Float](getDataset("r")).toStatic,
-          v_leak = TensorDynamic[Float](getDataset("v_leak")).toStatic
+          tau    = Tensor[Float](getDataset("tau")),
+          r      = Tensor[Float](getDataset("r")),
+          v_leak = Tensor[Float](getDataset("v_leak"))
         )
 
       case "Affine" =>
         AffineParams(
-          bias        = TensorDynamic[Float](getDataset("bias")).toStatic,
-          weight      = TensorDynamic[Float](getDataset("weight")).toStatic
+          bias   = Tensor[Float](getDataset("bias")),
+          weight = Tensor[Float](getDataset("weight"))
         )
 
       case "Conv1d" =>
         Conv1DParams(
-          weight = TensorDynamic[Float](getDataset("weight")).toStatic,
-          bias = TensorDynamic[Float](getDataset("bias")).toStatic,
-          stride = TensorDynamic[Long](getDataset("stride")).toStatic,
-          padding = TensorDynamic[Long](getDataset("padding")).toStatic,
-          dilation = TensorDynamic[Long](getDataset("dilation")).toStatic,
-          groups = getData[Long]("groups"),
+          weight      = Tensor[Float](getDataset("weight")),
+          bias        = Tensor[Float](getDataset("bias")),
+          stride      = Tensor[Long](getDataset("stride")),
+          padding     = Tensor[Long](getDataset("padding")),
+          dilation    = Tensor[Long](getDataset("dilation")),
+          groups      = getData[Long]("groups"),
           input_shape = getData[Long]("input_shape")
         )
 
       case "Conv2d" =>
         Conv2DParams(
-          weight = TensorDynamic[Float](getDataset("weight")).toStatic,
-          bias = TensorDynamic[Float](getDataset("bias")).toStatic,
-          stride = TensorDynamic[Long](getDataset("stride")).toStatic,
-          padding = TensorDynamic[Long](getDataset("padding")).toStatic,
-          dilation = TensorDynamic[Long](getDataset("dilation")).toStatic,
-          groups = getData[Long]("groups"),
-          input_shape = TensorDynamic[Long](getDataset("input_shape")).toStatic
+          weight      = Tensor[Float](getDataset("weight")),
+          bias        = Tensor[Float](getDataset("bias")),
+          stride      = Tensor[Long](getDataset("stride")),
+          padding     = Tensor[Long](getDataset("padding")),
+          dilation    = Tensor[Long](getDataset("dilation")),
+          groups      = getData[Long]("groups"),
+          input_shape = Tensor[Long](getDataset("input_shape"))
         )
 
       case "Flatten" =>
         FlattenParams(
-          start_dim = getData[Long]("start_dim"),
-          end_dim = getData[Long]("end_dim"),
-          input_type = TensorDynamic[Long](getDataset("input_type")).toStatic
+          start_dim  = getData[Long]("start_dim"),
+          end_dim    = getData[Long]("end_dim"),
+          input_type = Tensor[Long](getDataset("input_type"))
         )
 
       case "SumPool2d" =>
         SumPool2DParams(
-          kernel_size = TensorDynamic[Long](getDataset("kernel_size")).toStatic,
-            padding = TensorDynamic[Long](getDataset("padding")).toStatic,
-            stride = TensorDynamic[Long](getDataset("stride")).toStatic
+          kernel_size = Tensor[Long](getDataset("kernel_size")),
+          padding     = Tensor[Long](getDataset("padding")),
+          stride      = Tensor[Long](getDataset("stride"))
         )
 
       case other =>

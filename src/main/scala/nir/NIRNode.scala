@@ -49,11 +49,11 @@ sealed trait NIRParams {
   * @param input_shape length of the input signal
   */
 final case class Conv1DParams(
-  weight: TensorStatic[Float],
-  bias: TensorStatic[Float],
-  stride: TensorStatic[Long],
-  padding: TensorStatic[Long],
-  dilation: TensorStatic[Long],
+  weight: Tensor[Float],
+  bias: Tensor[Float],
+  stride: Tensor[Long],
+  padding: Tensor[Long],
+  dilation: Tensor[Long],
   groups: Long,
   input_shape: Long,
 ) extends NIRParams {
@@ -84,13 +84,13 @@ final case class Conv1DParams(
   * @param input_shape spatial dimensions of the input
   */
 final case class Conv2DParams(
-  weight: TensorStatic[Float],
-  bias: TensorStatic[Float],
-  stride: TensorStatic[Long],
-  padding: TensorStatic[Long],
-  dilation: TensorStatic[Long],
+  weight: Tensor[Float],
+  bias: Tensor[Float],
+  stride: Tensor[Long],
+  padding: Tensor[Long],
+  dilation: Tensor[Long],
   groups: Long,
-  input_shape: TensorStatic[Long]
+  input_shape: Tensor[Long]
 ) extends NIRParams {
     def outChannels: List[Int] =
     List(weight.shape(0))
@@ -118,7 +118,7 @@ final case class Conv2DParams(
 final case class FlattenParams(
   start_dim: Long,
   end_dim: Long,
-  input_type: TensorStatic[Long]
+  input_type: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "Flatten"
   override def toString: String = {
@@ -133,9 +133,9 @@ final case class FlattenParams(
   * @param stride step of the pooling window
   */
 final case class SumPool2DParams(
-  kernel_size: TensorStatic[Long],
-  padding: TensorStatic[Long],
-  stride: TensorStatic[Long]
+  kernel_size: Tensor[Long],
+  padding: Tensor[Long],
+  stride: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "SumPool2d"
   override def toString: String = {
@@ -151,9 +151,9 @@ final case class SumPool2DParams(
   * @param v_leak leak potential
   */
 final case class LIParams(
-  tau: TensorStatic[Float],
-  r: TensorStatic[Float],
-  v_leak: TensorStatic[Float],
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "LI"
   override def toString: String = {
@@ -163,7 +163,7 @@ final case class LIParams(
 
 
 final case class IParams(
-  r: TensorStatic[Float],
+  r: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "I"
   override def toString: String = {
@@ -178,9 +178,9 @@ final case class IParams(
   * @param v_threshold firing threshold
   */
 final case class IFParams(
-  r: TensorStatic[Float],
-  v_reset: TensorStatic[Float],
-  v_threshold: TensorStatic[Float],
+  r: Tensor[Float],
+  v_reset: Tensor[Float],
+  v_threshold: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "IF"
   override def toString: String = {
@@ -196,10 +196,10 @@ final case class IFParams(
   * @param v_threshold firing threshold
   */
 final case class LIFParams(
-  tau: TensorStatic[Float],
-  r: TensorStatic[Float],
-  v_leak: TensorStatic[Float],
-  v_threshold: TensorStatic[Float],
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
+  v_threshold: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "LIF"
   override def toString: String = {
@@ -214,9 +214,9 @@ final case class LIFParams(
   * @param tauSynInh inhibitory synapse constant
   */
 final case class CubaLIFParams(
-  tau: TensorStatic[Float],
-  tauSynExc: TensorStatic[Float],
-  tauSynInh: TensorStatic[Float],
+  tau: Tensor[Float],
+  tauSynExc: Tensor[Float],
+  tauSynInh: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "CubaLIF"
   override def toString: String = {
@@ -229,7 +229,7 @@ final case class CubaLIFParams(
   * @param weight transformation matrix
   */
 final case class LinearParams(
-  weight: TensorStatic[Float],
+  weight: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "Linear"
   override def toString: String = {
@@ -243,8 +243,8 @@ final case class LinearParams(
   * @param weight weight matrix
   */
 final case class AffineParams(
-  bias: TensorStatic[Float],
-  weight: TensorStatic[Float],
+  bias: Tensor[Float],
+  weight: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "Affine"
   override def toString: String = {
@@ -257,7 +257,7 @@ final case class AffineParams(
   * @param shape shape of the incoming tensor
   */
 final case class InputParams(
-  shape: TensorStatic[Long],
+  shape: Tensor[Long],
 ) extends NIRParams {
   override def nirType: String = "Input"
   override def toString: String = {
@@ -270,7 +270,7 @@ final case class InputParams(
   * @param shape shape of the produced tensor
   */
 final case class OutputParams(
-  shape: TensorStatic[Long],
+  shape: Tensor[Long],
 ) extends NIRParams {
   override def nirType: String = "Output"
   override def toString: String = {
@@ -291,13 +291,13 @@ final case class AffineLIFParams(
   old_lif_id: String,
 
   // Affine
-  weight: TensorStatic[Float],
+  weight: Tensor[Float],
 
   // LIF
-  tau: TensorStatic[Float],
-  r: TensorStatic[Float],
-  v_leak: TensorStatic[Float],
-  v_threshold: TensorStatic[Float],
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
+  v_threshold: Tensor[Float],
 ) extends NIRParams {
   override def nirType: String = "AffineLIF"
   override def toString: String = {
