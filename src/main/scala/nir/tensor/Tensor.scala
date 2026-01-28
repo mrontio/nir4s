@@ -95,6 +95,9 @@ class Tensor[T: ClassTag] private (
     buildNested(0, shape).asInstanceOf[List[_]]
   }
 
+  /** Convert to flat List of all elements. */
+  def toFlatList: List[T] = data.toList
+
   /** Save tensor to text file for Python interop. */
   def save(path: String): Unit = {
     val writer = new PrintWriter(path)
