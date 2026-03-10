@@ -3,29 +3,36 @@ package nir
 
 import tensor._
 
-/** Unresolved graph node identified only by string IDs for its
-  * predecessors.
+/** Unresolved graph node identified only by string IDs for its predecessors.
   *
-  * @param id unique identifier for this node
-  * @param prevIds identifiers of predecessor nodes
-  * @param params operation parameters for this node
+  * @param id
+  *   unique identifier for this node
+  * @param prevIds
+  *   identifiers of predecessor nodes
+  * @param params
+  *   operation parameters for this node
   */
 case class RawNode(
-  id:      String,
-  prevIds: Set[String],
-  params:  NIRParams
+    id: String,
+    prevIds: Set[String],
+    params: NIRParams
 )
 
 /** Resolved node within a NIR graph.
   *
-  * @param id unique identifier for this node
-  * @param previous actual predecessor nodes
-  * @param params operation parameters associated with this node
+  * @param id
+  *   unique identifier for this node
+  * @param previous
+  *   actual predecessor nodes
+  * @param params
+  *   operation parameters associated with this node
   */
 case class NIRNode(
-  id:       String,
-  var previous: Set[NIRNode], // TODO: This should not be var, I need this temporarily.
-  params:   NIRParams
+    id: String,
+    var previous: Set[
+      NIRNode
+    ], // TODO: This should not be var, I need this temporarily.
+    params: NIRParams
 ) {
   override def toString: String = {
     val prevIds = previous.map(_.id).mkString("{", ", ", "}")
@@ -40,22 +47,29 @@ sealed trait NIRParams {
 
 /** Parameters describing a one-dimensional convolution operation.
   *
-  * @param weight filter weights with shape `(out, in, k)`
-  * @param bias bias tensor
-  * @param stride stride along the spatial dimension
-  * @param padding zero-padding applied to the input
-  * @param dilation dilation factor of the kernel
-  * @param groups number of groups the input is split into
-  * @param input_shape length of the input signal
+  * @param weight
+  *   filter weights with shape `(out, in, k)`
+  * @param bias
+  *   bias tensor
+  * @param stride
+  *   stride along the spatial dimension
+  * @param padding
+  *   zero-padding applied to the input
+  * @param dilation
+  *   dilation factor of the kernel
+  * @param groups
+  *   number of groups the input is split into
+  * @param input_shape
+  *   length of the input signal
   */
 final case class Conv1DParams(
-  weight: Tensor[Float],
-  bias: Tensor[Float],
-  stride: Tensor[Long],
-  padding: Tensor[Long],
-  dilation: Tensor[Long],
-  groups: Long,
-  input_shape: Long,
+    weight: Tensor[Float],
+    bias: Tensor[Float],
+    stride: Tensor[Long],
+    padding: Tensor[Long],
+    dilation: Tensor[Long],
+    groups: Long,
+    input_shape: Long
 ) extends NIRParams {
   def outChannels: List[Int] =
     List(weight.shape(0))
@@ -68,31 +82,39 @@ final case class Conv1DParams(
 
   override def nirType: String = "Conv1d"
   override def toString: String = {
-    val weightString = s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+    val weightString =
+      s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
     s"Conv1D {\n\tweight = $weightString,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 
 /** Parameters describing a two-dimensional convolution operation.
   *
-  * @param weight filter weights `(out, in, kH, kW)`
-  * @param bias bias tensor
-  * @param stride strides along height and width
-  * @param padding padding along height and width
-  * @param dilation dilation factors
-  * @param groups grouping factor
-  * @param input_shape spatial dimensions of the input
+  * @param weight
+  *   filter weights `(out, in, kH, kW)`
+  * @param bias
+  *   bias tensor
+  * @param stride
+  *   strides along height and width
+  * @param padding
+  *   padding along height and width
+  * @param dilation
+  *   dilation factors
+  * @param groups
+  *   grouping factor
+  * @param input_shape
+  *   spatial dimensions of the input
   */
 final case class Conv2DParams(
-  weight: Tensor[Float],
-  bias: Tensor[Float],
-  stride: Tensor[Long],
-  padding: Tensor[Long],
-  dilation: Tensor[Long],
-  groups: Long,
-  input_shape: Tensor[Long]
+    weight: Tensor[Float],
+    bias: Tensor[Float],
+    stride: Tensor[Long],
+    padding: Tensor[Long],
+    dilation: Tensor[Long],
+    groups: Long,
+    input_shape: Tensor[Long]
 ) extends NIRParams {
-    def outChannels: List[Int] =
+  def outChannels: List[Int] =
     List(weight.shape(0))
 
   def inChannels: List[Int] =
@@ -103,22 +125,25 @@ final case class Conv2DParams(
 
   override def nirType: String = "Conv2d"
   override def toString: String = {
-    val weightString =  s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
+    val weightString =
+      s"\n\t\tWeight shape: ${weight.shape},\n\t\tKernel size: ${kernelSize}\n\t\tChannels in: ${inChannels},\n\t\tChannels out: ${outChannels}"
     s"$nirType {\n\tweights = $weightString,\n\tbias = ${bias.shape},\n\tstride = $stride,\n\tpadding = $padding,\n\tdilation = $dilation,\n\tgroups = $groups,\n\tinput_shape = $input_shape\n}"
   }
 }
 
-
 /** Parameters for flattening a tensor into a lower rank.
   *
-  * @param start_dim first dimension to flatten
-  * @param end_dim last dimension to flatten
-  * @param input_type original tensor shape
+  * @param start_dim
+  *   first dimension to flatten
+  * @param end_dim
+  *   last dimension to flatten
+  * @param input_type
+  *   original tensor shape
   */
 final case class FlattenParams(
-  start_dim: Long,
-  end_dim: Long,
-  input_type: Tensor[Long]
+    start_dim: Long,
+    end_dim: Long,
+    input_type: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "Flatten"
   override def toString: String = {
@@ -128,14 +153,17 @@ final case class FlattenParams(
 
 /** Parameters for two-dimensional sum pooling.
   *
-  * @param kernel_size size of the pooling window
-  * @param padding padding applied before pooling
-  * @param stride step of the pooling window
+  * @param kernel_size
+  *   size of the pooling window
+  * @param padding
+  *   padding applied before pooling
+  * @param stride
+  *   step of the pooling window
   */
 final case class SumPool2DParams(
-  kernel_size: Tensor[Long],
-  padding: Tensor[Long],
-  stride: Tensor[Long]
+    kernel_size: Tensor[Long],
+    padding: Tensor[Long],
+    stride: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "SumPool2d"
   override def toString: String = {
@@ -143,17 +171,19 @@ final case class SumPool2DParams(
   }
 }
 
-
 /** Leaky integrator neuron parameters.
   *
-  * @param tau time constant
-  * @param r resistance
-  * @param v_leak leak potential
+  * @param tau
+  *   time constant
+  * @param r
+  *   resistance
+  * @param v_leak
+  *   leak potential
   */
 final case class LIParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
+    tau: Tensor[Float],
+    r: Tensor[Float],
+    v_leak: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "LI"
   override def toString: String = {
@@ -161,9 +191,8 @@ final case class LIParams(
   }
 }
 
-
 final case class IParams(
-  r: Tensor[Float],
+    r: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "I"
   override def toString: String = {
@@ -173,14 +202,17 @@ final case class IParams(
 
 /** Integrate-and-fire neuron parameters.
   *
-  * @param r membrane resistance
-  * @param v_reset reset potential
-  * @param v_threshold firing threshold
+  * @param r
+  *   membrane resistance
+  * @param v_reset
+  *   reset potential
+  * @param v_threshold
+  *   firing threshold
   */
 final case class IFParams(
-  r: Tensor[Float],
-  v_reset: Tensor[Float],
-  v_threshold: Tensor[Float],
+    r: Tensor[Float],
+    v_reset: Tensor[Float],
+    v_threshold: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "IF"
   override def toString: String = {
@@ -190,16 +222,20 @@ final case class IFParams(
 
 /** Leaky integrate-and-fire neuron parameters.
   *
-  * @param tau membrane time constant
-  * @param r membrane resistance
-  * @param v_leak leak potential
-  * @param v_threshold firing threshold
+  * @param tau
+  *   membrane time constant
+  * @param r
+  *   membrane resistance
+  * @param v_leak
+  *   leak potential
+  * @param v_threshold
+  *   firing threshold
   */
 final case class LIFParams(
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
-  v_threshold: Tensor[Float],
+    tau: Tensor[Float],
+    r: Tensor[Float],
+    v_leak: Tensor[Float],
+    v_threshold: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "LIF"
   override def toString: String = {
@@ -207,16 +243,20 @@ final case class LIFParams(
   }
 }
 
-/** Current-based LIF neuron parameters with excitatory and inhibitory time constants.
+/** Current-based LIF neuron parameters with excitatory and inhibitory time
+  * constants.
   *
-  * @param tau membrane time constant
-  * @param tauSynExc excitatory synapse constant
-  * @param tauSynInh inhibitory synapse constant
+  * @param tau
+  *   membrane time constant
+  * @param tauSynExc
+  *   excitatory synapse constant
+  * @param tauSynInh
+  *   inhibitory synapse constant
   */
 final case class CubaLIFParams(
-  tau: Tensor[Float],
-  tauSynExc: Tensor[Float],
-  tauSynInh: Tensor[Float],
+    tau: Tensor[Float],
+    tauSynExc: Tensor[Float],
+    tauSynInh: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "CubaLIF"
   override def toString: String = {
@@ -226,10 +266,11 @@ final case class CubaLIFParams(
 
 /** Parameters of a linear transformation.
   *
-  * @param weight transformation matrix
+  * @param weight
+  *   transformation matrix
   */
 final case class LinearParams(
-  weight: Tensor[Float],
+    weight: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "Linear"
   override def toString: String = {
@@ -239,12 +280,14 @@ final case class LinearParams(
 
 /** Parameters of an affine transformation.
   *
-  * @param bias bias vector
-  * @param weight weight matrix
+  * @param bias
+  *   bias vector
+  * @param weight
+  *   weight matrix
   */
 final case class AffineParams(
-  bias: Tensor[Float],
-  weight: Tensor[Float],
+    bias: Tensor[Float],
+    weight: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "Affine"
   override def toString: String = {
@@ -254,10 +297,11 @@ final case class AffineParams(
 
 /** Parameters describing the input node of a graph.
   *
-  * @param shape shape of the incoming tensor
+  * @param shape
+  *   shape of the incoming tensor
   */
 final case class InputParams(
-  shape: Tensor[Long],
+    shape: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "Input"
   override def toString: String = {
@@ -267,10 +311,11 @@ final case class InputParams(
 
 /** Parameters describing the output node of a graph.
   *
-  * @param shape shape of the produced tensor
+  * @param shape
+  *   shape of the produced tensor
   */
 final case class OutputParams(
-  shape: Tensor[Long],
+    shape: Tensor[Long]
 ) extends NIRParams {
   override def nirType: String = "Output"
   override def toString: String = {
@@ -278,26 +323,45 @@ final case class OutputParams(
   }
 }
 
-
-
-/**
-  * A temporary class that is not part of the NIR standard but I need for our research.
-  * To be removed once subgraphing functionality has been implemented
+/** A temporary class that is not part of the NIR standard but I need for our
+  * research. To be removed once subgraphing functionality has been implemented
   * This is a subgraph Affine -> LIF
   */
+/** A temporary class that is not part of the NIR standard but I need for our
+  * research. To be removed once subgraphing functionality has been implemented
+  * This is a subgraph Affine -> LI
+  */
+final case class AffineLIParams(
+    old_linear_id: String,
+    old_li_id: String,
+
+    // Affine
+    weight: Tensor[Float],
+
+    // LI
+    tau: Tensor[Float],
+    r: Tensor[Float],
+    v_leak: Tensor[Float]
+) extends NIRParams {
+  override def nirType: String = "AffineLI"
+  override def toString: String = {
+    s"$nirType {\n\tweight = ${weight.shape}\n\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
+  }
+}
+
 final case class AffineLIFParams(
-  //
-  old_linear_id: String,
-  old_lif_id: String,
+    //
+    old_linear_id: String,
+    old_lif_id: String,
 
-  // Affine
-  weight: Tensor[Float],
+    // Affine
+    weight: Tensor[Float],
 
-  // LIF
-  tau: Tensor[Float],
-  r: Tensor[Float],
-  v_leak: Tensor[Float],
-  v_threshold: Tensor[Float],
+    // LIF
+    tau: Tensor[Float],
+    r: Tensor[Float],
+    v_leak: Tensor[Float],
+    v_threshold: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "AffineLIF"
   override def toString: String = {

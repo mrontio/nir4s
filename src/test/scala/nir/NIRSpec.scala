@@ -5,7 +5,6 @@ import java.io.File
 import java.nio.file.{Files, Paths}
 import scala.jdk.CollectionConverters._
 
-
 class NIRSpec extends FunSuite {
 
   // Root directory where samples are stored
@@ -14,13 +13,18 @@ class NIRSpec extends FunSuite {
   // Find all .nir files and group them by the first-level folder (e.g., 'li', 'foo')
   val nirFilesByGroup: Map[String, List[String]] = {
     if (Files.exists(sampleRoot)) {
-      Files.walk(sampleRoot)
+      Files
+        .walk(sampleRoot)
         .iterator()
         .asScala
         .filter(p => p.toString.endsWith("/network.nir"))
         .toList
         .groupBy { path =>
-          sampleRoot.relativize(path).iterator().next().toString  // 'li', 'foo', etc.
+          sampleRoot
+            .relativize(path)
+            .iterator()
+            .next()
+            .toString // 'li', 'foo', etc.
         }
         .view
         .mapValues(_.map(_.toString))
@@ -44,13 +48,24 @@ class NIRSpec extends FunSuite {
     }
   }
 
-
   test("Subgraph Reduction") {
     val path = sampleRoot + "/affine-lif/network.nir"
     val g = NIRGraph(new File(path))
 
     println(g)
-    val gs = NIRGraph.reduceAffineLIF(g)
+    val gs = NIRGraph.reduce(g)
     println(gs)
+  }
+
+  test("Subgraph Reduction AffineLI") {
+    val path = sampleRoot + "/affine-li/network.nir"
+    val g = NIRGraph(new File(path))
+
+    println(g)
+    val gs = NIRGraph.reduce(g)
+    println(gs)
+
+    val fusedNode = gs.nodes.find(_.params.nirType == "AffineLI")
+    assert(fusedNode.isDefined, "Expected an AffineLI node after reduction")
   }
 }
