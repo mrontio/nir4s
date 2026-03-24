@@ -75,15 +75,15 @@ object NIRGraph {
           v_leak = lif.v_leak,
           v_threshold = lif.v_threshold
         )
-      case li: LIParams =>
-        AffineLIParams(
-          old_linear_id = affineNode.id,
-          old_li_id = neuronNode.id,
-          weight = affineParams.weight,
-          tau = li.tau,
-          r = li.r,
-          v_leak = li.v_leak
-        )
+      // case li: LIParams =>
+      //   AffineLIParams(
+      //     old_linear_id = affineNode.id,
+      //     old_li_id = neuronNode.id,
+      //     weight = affineParams.weight,
+      //     tau = li.tau,
+      //     r = li.r,
+      //     v_leak = li.v_leak
+      //   )
       case other =>
         throw new RuntimeException(
           s"Unexpected neuron type in reduce: ${other.nirType}"

@@ -327,27 +327,27 @@ final case class OutputParams(
   * research. To be removed once subgraphing functionality has been implemented
   * This is a subgraph Affine -> LIF
   */
-/** A temporary class that is not part of the NIR standard but I need for our
-  * research. To be removed once subgraphing functionality has been implemented
-  * This is a subgraph Affine -> LI
-  */
-final case class AffineLIParams(
-    old_linear_id: String,
-    old_li_id: String,
-
-    // Affine
-    weight: Tensor[Float],
-
-    // LI
-    tau: Tensor[Float],
-    r: Tensor[Float],
-    v_leak: Tensor[Float]
-) extends NIRParams {
-  override def nirType: String = "AffineLI"
-  override def toString: String = {
-    s"$nirType {\n\tweight = ${weight.shape}\n\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
-  }
-}
+// /** A temporary class that is not part of the NIR standard but I need for our
+//   * research. To be removed once subgraphing functionality has been implemented
+//   * This is a subgraph Affine -> LI
+//   */
+// final case class AffineLIParams(
+//     old_linear_id: String,
+//     old_li_id: String,
+//
+//     // Affine
+//     weight: Tensor[Float],
+//
+//     // LI
+//     tau: Tensor[Float],
+//     r: Tensor[Float],
+//     v_leak: Tensor[Float]
+// ) extends NIRParams {
+//   override def nirType: String = "AffineLI"
+//   override def toString: String = {
+//     s"$nirType {\n\tweight = ${weight.shape}\n\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape}\n}"
+//   }
+// }
 
 final case class AffineLIFParams(
     //

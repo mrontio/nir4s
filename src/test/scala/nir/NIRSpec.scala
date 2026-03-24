@@ -57,15 +57,15 @@ class NIRSpec extends FunSuite {
     println(gs)
   }
 
-  test("Subgraph Reduction AffineLI") {
-    val path = sampleRoot + "/affine-li/network.nir"
-    val g = NIRGraph(new File(path))
+  // test("Subgraph Reduction AffineLI") {
+  //   val path = sampleRoot + "/affine-li/network.nir"
+  //   val g = NIRGraph(new File(path))
 
-    println(g)
-    val gs = NIRGraph.reduce(g)
-    println(gs)
+  //   println(g)
+  //   val gs = NIRGraph.reduce(g)
+  //   println(gs)
 
-    val fusedNode = gs.nodes.find(_.params.nirType == "AffineLI")
-    assert(fusedNode.isDefined, "Expected an AffineLI node after reduction")
-  }
+  //   val fusedNode = gs.nodes.find(_.params.nirType == "AffineLI")
+  //   assert(fusedNode.isDefined, "Expected an AffineLI node after reduction")
+  // }
 }
