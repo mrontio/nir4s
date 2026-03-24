@@ -44,9 +44,9 @@ object NIRGraph {
   }
 
   def reduce(graph: NIRGraph): NIRGraph = {
-    // Step 1: Find LIF or LI nodes that have Affine as previous
+    // Step 1: Find LIF nodes that have Affine as previous
     val neuronAfterAffine = graph.nodes.filter { node =>
-      (node.params.nirType == "LIF" || node.params.nirType == "LI") &&
+      (node.params.nirType == "LIF" /* || node.params.nirType == "LI" */) &&
       node.previous.nonEmpty &&
       node.previous.head.params.nirType == "Affine"
     }
