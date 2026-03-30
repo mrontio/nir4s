@@ -355,6 +355,7 @@ final case class AffineLIFParams(
     old_lif_id: String,
 
     // Affine
+    bias: Tensor[Float],
     weight: Tensor[Float],
 
     // LIF

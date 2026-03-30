@@ -69,6 +69,7 @@ object NIRGraph {
         AffineLIFParams(
           old_linear_id = affineNode.id,
           old_lif_id = neuronNode.id,
+          bias = affineParams.bias,
           weight = affineParams.weight,
           tau = lif.tau,
           r = lif.r,
