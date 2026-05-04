@@ -228,6 +228,10 @@ object Tensor {
         arr.map(_.toDouble)
       case "<u1" =>
         dataBytes.map(b => (b & 0xff).toDouble)
+      case "<u4" =>
+        val arr = new Array[Int](dataBytes.length / 4)
+        dbuf.asIntBuffer().get(arr)
+        arr.map(v => (v & 0xffffffffL).toDouble)
       case other =>
         throw new IllegalArgumentException(s"Unsupported dtype: $other")
     }
