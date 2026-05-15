@@ -1,6 +1,6 @@
 import Dependencies._
 
-ThisBuild / scalaVersion     := "2.13.14"
+ThisBuild / scalaVersion     := "2.13.15"
 
 val javaHDF = "io.jhdf" % "jhdf" % "0.6.5"
 val munitTest = munit % Test
@@ -16,7 +16,7 @@ val circeParser = "io.circe" % "circe-parser_2.13" % circeVersion
 lazy val nir = (project in file("."))
   .settings(
     name := "nir",
-    scalaVersion     := "2.13.14",
+    scalaVersion     := "2.13.15",
     libraryDependencies ++= Seq(slf4j_api, slf4j_console, munitTest, javaHDF, circeCore, circeGeneric, circeParser)
   )
 
