@@ -232,14 +232,15 @@ final case class IFParams(
   *   firing threshold
   */
 final case class LIFParams(
-    tau: Tensor[Float],
-    r: Tensor[Float],
-    v_leak: Tensor[Float],
-    v_threshold: Tensor[Float]
+  tau: Tensor[Float],
+  r: Tensor[Float],
+  v_leak: Tensor[Float],
+  v_threshold: Tensor[Float],
+  v_reset: Tensor[Float]
 ) extends NIRParams {
   override def nirType: String = "LIF"
   override def toString: String = {
-    s"$nirType {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n}"
+    s"$nirType {\n\ttau = ${tau.shape},\n\tr = ${r.shape},\n\tv_leak = ${v_leak.shape},\n\tv_threshold = ${v_threshold.shape}\n\tv_reset = ${v_reset.shape}\n}"
   }
 }
 

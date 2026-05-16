@@ -82,7 +82,8 @@ object NIRFileMapper {
           tau         = Tensor[Float](getDataset("tau")),
           r           = Tensor[Float](getDataset("r")),
           v_leak      = Tensor[Float](getDataset("v_leak")),
-          v_threshold = Tensor[Float](getDataset("v_threshold"))
+          v_threshold = Tensor[Float](getDataset("v_threshold")),
+          v_reset = Tensor[Float](getDataset("v_reset"))
         )
 
       case "CubaLIF" =>

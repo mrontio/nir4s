@@ -11,10 +11,10 @@ model = SequentialState(
     nn.Linear(100, 10, bias=False),
     norse.torch.LIFBoxCell(
         p=norse.torch.LIFBoxParameters(
-            tau_mem_inv=torch.tensor([100.0]),
-            v_th=torch.tensor([1.0]),
-            v_reset=torch.tensor([0.0]),
-            v_leak=torch.tensor([0.0]),
+            tau_mem_inv=torch.full((10,), 100.0),
+            v_th=torch.full((10,), 1.0),
+            v_reset=torch.full((10,), 0.0),
+            v_leak=torch.full((10,), 0.0),
         )
     )
 )
